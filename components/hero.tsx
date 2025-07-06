@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import {
   ArrowRight,
   Sparkles,
@@ -121,8 +122,8 @@ export function Hero() {
   }));
 
   const handleGetStarted = () => {
-    // Add haptic feedback or navigation logic here
-    console.log("Get Started pressed");
+    // Navigate to sign-in route
+    router.push("/sign-in");
   };
 
   return (

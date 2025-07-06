@@ -7,11 +7,13 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { ArrowLeft } from "lucide-react-native";
 import * as React from "react";
 import { Appearance, Platform } from "react-native";
-import { ThemeToggle } from "~/components/ThemeToggle";
+import { ThemeToggle } from "~/components/themeToggle";
+import { Button } from "~/components/ui/button";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
@@ -49,6 +51,28 @@ export default function RootLayout() {
           options={{
             title: "Plan Genie AI",
             headerRight: () => <ThemeToggle />,
+          }}
+        />
+        <Stack.Screen
+          name="sign-in"
+          options={{
+            title: "Sign In",
+            headerShown: true,
+            headerLeft: () => (
+              <Button variant="ghost" onPress={() => router.back()}>
+                <ArrowLeft
+                  size={24}
+                  color={isDarkColorScheme ? "#fff" : "#000"}
+                />
+              </Button>
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="sign-up"
+          options={{
+            title: "Sign Up",
+            headerShown: true,
           }}
         />
       </Stack>

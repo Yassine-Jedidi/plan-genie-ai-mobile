@@ -1,6 +1,6 @@
 import * as React from "react";
 import { View } from "react-native";
-import { Hero } from "~/components/Hero";
+import { Hero } from "~/components/hero";
 
 export default function Screen() {
   return (
