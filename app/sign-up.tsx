@@ -1,12 +1,13 @@
 import { router } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import * as React from "react";
-import { Pressable, TextInput, TouchableOpacity, View } from "react-native";
+import { Pressable, TextInput, TouchableOpacity, View, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { GoogleIcon } from "~/lib/icons/Google";
+import { authAPI } from "~/services/authAPI";
 
 export default function SignUpScreen() {
   const { isDarkColorScheme } = useColorScheme();
@@ -19,7 +20,7 @@ export default function SignUpScreen() {
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     setError("");
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
       setError("Please fill in all fields.");
@@ -37,16 +38,44 @@ export default function SignUpScreen() {
       setError("Passwords do not match.");
       return;
     }
-    // TODO: Implement sign-up logic (API call)
+
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const result = await authAPI.signUp(email, password);
+      
+      // Handle successful sign-up
+      console.log("Sign-up successful:", result);
+      
+      Alert.alert(
+        "Account Created",
+        "Your account has been created successfully. Please check your email for verification.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/sign-in"),
+          },
+        ]
+      );
+      
+    } catch (error: any) {
+      console.error("Sign-up error:", error);
+      setError(error.message || "Failed to create account. Please try again.");
+    } finally {
       setLoading(false);
-      router.replace("/sign-in");
-    }, 1000);
+    }
   };
 
-  const handleGoogleSignUp = () => {
-    // TODO: Implement Google sign-up logic
+  const handleGoogleSignUp = async () => {
+    try {
+      const { url } = await authAPI.getGoogleOAuthURL();
+      // TODO: Implement Google OAuth flow for mobile
+      console.log("Google OAuth URL:", url);
+      Alert.alert("Google Sign Up", "Google OAuth implementation needed for mobile");
+    } catch (error: any) {
+      console.error("Google sign-up error:", error);
+      Alert.alert("Error", "Failed to initialize Google sign-up");
+    }
   };
 
   return (

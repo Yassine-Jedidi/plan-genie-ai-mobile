@@ -1,31 +1,105 @@
 import { router } from "expo-router";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react-native";
 import * as React from "react";
-import { Pressable, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { GoogleIcon } from "~/lib/icons/Google";
+import { authAPI } from "~/services/authAPI";
 
 export default function SignInScreen() {
   const { isDarkColorScheme } = useColorScheme();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
-  const [showSuccess, setShowSuccess] = React.useState(false); // Toggle for demo
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleSignIn = () => {
-    // TODO: Add sign-in logic
-    setShowSuccess(true);
+  const handleSignIn = async () => {
+    if (!email.trim() || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await authAPI.signIn(email, password);
+
+      // Handle successful sign-in
+      console.log("Sign-in successful:", result);
+
+      // Navigate to home page
+      router.push("/home");
+    } catch (error: any) {
+      console.error("Sign-in error:", error);
+      setError(error.message || "Failed to sign in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleGoogleSignIn = () => {
-    // TODO: Add Google sign-in logic
+  const handleGoogleSignIn = async () => {
+    try {
+      const { url } = await authAPI.getGoogleOAuthURL();
+      // TODO: Implement Google OAuth flow for mobile
+      // You might want to use WebBrowser.openBrowserAsync or similar
+      console.log("Google OAuth URL:", url);
+      Alert.alert(
+        "Google Sign In",
+        "Google OAuth implementation needed for mobile"
+      );
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
+      Alert.alert("Error", "Failed to initialize Google sign-in");
+    }
+  };
+
+  const handleForgotPassword = () => {
+    // Navigate to forgot password screen or show modal
+    // For now, we'll show an alert asking for email
+    Alert.prompt(
+      "Reset Password",
+      "Enter your email address to receive password reset instructions:",
+      async (userEmail) => {
+        if (userEmail && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(userEmail)) {
+          try {
+            await authAPI.resetPassword(userEmail);
+            Alert.alert(
+              "Email Sent",
+              "If an account with that email exists, a password reset link has been sent."
+            );
+          } catch (error: any) {
+            Alert.alert(
+              "Error",
+              "Failed to send reset email. Please try again."
+            );
+          }
+        } else {
+          Alert.alert("Error", "Please enter a valid email address.");
+        }
+      },
+      "plain-text",
+      email
+    );
   };
 
   return (
@@ -101,25 +175,29 @@ export default function SignInScreen() {
         </View>
 
         {/* Forgot password */}
-        <Pressable onPress={() => {}} className="mb-4">
+        <Pressable onPress={handleForgotPassword} className="mb-4">
           <Text className="text-primary font-medium">
             Forgot your password?
           </Text>
         </Pressable>
 
-        {/* Success/info message (conditionally rendered) */}
-        {showSuccess && (
-          <View className="flex-row items-center bg-success/90 rounded-lg p-4 mb-4">
-            <Text className="text-success-foreground font-medium">
-              Success!
+        {/* Error message (conditionally rendered) */}
+        {error ? (
+          <View className="flex-row items-center bg-destructive/90 rounded-lg p-4 mb-4">
+            <Text className="text-destructive-foreground font-medium">
+              {error}
             </Text>
           </View>
-        )}
+        ) : null}
 
         {/* Sign in button */}
-        <Button className="mt-2 mb-2 py-3" onPress={handleSignIn}>
+        <Button
+          className="mt-2 mb-2 py-3"
+          onPress={handleSignIn}
+          disabled={loading}
+        >
           <Text className="text-lg font-semibold text-primary-foreground">
-            Sign in
+            {loading ? "Signing in..." : "Sign in"}
           </Text>
         </Button>
 

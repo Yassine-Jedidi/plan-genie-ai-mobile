@@ -1,0 +1,141 @@
+// API Configuration
+const API_BASE_URL = 'https://plan-genie-ai-backend.vercel.app';
+
+// Custom headers for mobile requests
+const getMobileHeaders = () => ({
+  'Content-Type': 'application/json',
+  'User-Agent': 'Plan-Genie-Mobile-App/1.0 (Expo)',
+});
+
+// Generic API request function
+const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const defaultOptions: RequestInit = {
+    ...options,
+    headers: {
+      ...getMobileHeaders(),
+      ...options.headers,
+    },
+  };
+
+  try {
+    const response = await fetch(url, defaultOptions);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('API Request Error:', error);
+    throw error;
+  }
+};
+
+// Authentication API Service
+export const authAPI = {
+  // Sign up with mobile bypass
+  signUp: async (email: string, password: string) => {
+    return apiRequest('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password,
+        clientType: 'expo', // This identifies the request as coming from mobile
+        // No turnstileToken needed for mobile
+      }),
+    });
+  },
+
+  // Sign in with mobile bypass
+  signIn: async (email: string, password: string) => {
+    return apiRequest('/auth/signin', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password,
+        clientType: 'expo', // This identifies the request as coming from mobile
+        // No turnstileToken needed for mobile
+      }),
+    });
+  },
+
+  // Sign out
+  signOut: async () => {
+    return apiRequest('/auth/signout', {
+      method: 'POST',
+    });
+  },
+
+  // Reset password with mobile bypass
+  resetPassword: async (email: string) => {
+    return apiRequest('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        clientType: 'expo', // This identifies the request as coming from mobile
+        // No turnstileToken needed for mobile
+      }),
+    });
+  },
+
+  // Update password
+  updatePassword: async (password: string, accessToken: string, refreshToken: string) => {
+    return apiRequest('/auth/update-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        password,
+        accessToken,
+        refreshToken,
+      }),
+    });
+  },
+
+  // Get current user
+  getCurrentUser: async () => {
+    return apiRequest('/auth/me', {
+      method: 'GET',
+    });
+  },
+
+  // Google OAuth URL
+  getGoogleOAuthURL: async () => {
+    return apiRequest('/auth/google', {
+      method: 'GET',
+    });
+  },
+
+  // Handle OAuth callback
+  handleTokenExchange: async (tokens: {
+    access_token: string;
+    refresh_token?: string;
+    expires_in?: number;
+    provider_token?: string;
+    provider_refresh_token?: string;
+  }) => {
+    return apiRequest('/auth/callback', {
+      method: 'POST',
+      body: JSON.stringify(tokens),
+    });
+  },
+
+  // Update profile
+  updateProfile: async (data: any) => {
+    return apiRequest('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ data }),
+    });
+  },
+
+  // Update theme
+  updateTheme: async (theme: string, colorTheme: string) => {
+    return apiRequest('/auth/theme', {
+      method: 'PUT',
+      body: JSON.stringify({ theme, colorTheme }),
+    });
+  },
+};
+
+export default authAPI;
