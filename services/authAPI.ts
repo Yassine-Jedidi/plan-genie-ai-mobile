@@ -100,27 +100,6 @@ export const authAPI = {
     });
   },
 
-  // Google OAuth URL
-  getGoogleOAuthURL: async () => {
-    return apiRequest('/auth/google', {
-      method: 'GET',
-    });
-  },
-
-  // Handle OAuth callback
-  handleTokenExchange: async (tokens: {
-    access_token: string;
-    refresh_token?: string;
-    expires_in?: number;
-    provider_token?: string;
-    provider_refresh_token?: string;
-  }) => {
-    return apiRequest('/auth/callback', {
-      method: 'POST',
-      body: JSON.stringify(tokens),
-    });
-  },
-
   // Update profile
   updateProfile: async (data: any) => {
     return apiRequest('/auth/profile', {

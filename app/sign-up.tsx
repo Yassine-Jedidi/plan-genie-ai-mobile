@@ -1,12 +1,17 @@
 import { router } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import * as React from "react";
-import { Pressable, TextInput, TouchableOpacity, View, Alert } from "react-native";
+import {
+  Alert,
+  Pressable,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
-import { GoogleIcon } from "~/lib/icons/Google";
 import { authAPI } from "~/services/authAPI";
 
 export default function SignUpScreen() {
@@ -43,10 +48,10 @@ export default function SignUpScreen() {
 
     try {
       const result = await authAPI.signUp(email, password);
-      
+
       // Handle successful sign-up
       console.log("Sign-up successful:", result);
-      
+
       Alert.alert(
         "Account Created",
         "Your account has been created successfully. Please check your email for verification.",
@@ -57,24 +62,11 @@ export default function SignUpScreen() {
           },
         ]
       );
-      
     } catch (error: any) {
       console.error("Sign-up error:", error);
       setError(error.message || "Failed to create account. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    try {
-      const { url } = await authAPI.getGoogleOAuthURL();
-      // TODO: Implement Google OAuth flow for mobile
-      console.log("Google OAuth URL:", url);
-      Alert.alert("Google Sign Up", "Google OAuth implementation needed for mobile");
-    } catch (error: any) {
-      console.error("Google sign-up error:", error);
-      Alert.alert("Error", "Failed to initialize Google sign-up");
     }
   };
 
@@ -84,28 +76,9 @@ export default function SignUpScreen() {
         <Text className="text-2xl font-bold text-foreground mb-2 text-center">
           Sign up for Plan Genie AI
         </Text>
-        <Text className="text-base text-muted-foreground mb-4 text-center">
+        <Text className="text-base text-muted-foreground mb-6 text-center">
           Create your account to get started
         </Text>
-
-        {/* Google Sign Up */}
-        <Button
-          variant="outline"
-          className="flex-row items-center justify-center mb-4"
-          onPress={handleGoogleSignUp}
-        >
-          <View className="flex-row items-center justify-center flex-1">
-            <GoogleIcon size={20} style={{ marginRight: 8 }} />
-            <Text className="font-medium">Google</Text>
-          </View>
-        </Button>
-
-        {/* Divider */}
-        <View className="flex-row items-center my-2">
-          <View className="flex-1 h-px bg-border" />
-          <Text className="mx-2 text-muted-foreground">or</Text>
-          <View className="flex-1 h-px bg-border" />
-        </View>
 
         {/* Name Field */}
         <Text className="font-semibold mb-1 mt-2">Name</Text>

@@ -12,7 +12,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
-import { GoogleIcon } from "~/lib/icons/Google";
 import { authAPI } from "~/services/authAPI";
 
 export default function SignInScreen() {
@@ -57,22 +56,6 @@ export default function SignInScreen() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const { url } = await authAPI.getGoogleOAuthURL();
-      // TODO: Implement Google OAuth flow for mobile
-      // You might want to use WebBrowser.openBrowserAsync or similar
-      console.log("Google OAuth URL:", url);
-      Alert.alert(
-        "Google Sign In",
-        "Google OAuth implementation needed for mobile"
-      );
-    } catch (error: any) {
-      console.error("Google sign-in error:", error);
-      Alert.alert("Error", "Failed to initialize Google sign-in");
-    }
-  };
-
   const handleForgotPassword = () => {
     // Navigate to forgot password screen or show modal
     // For now, we'll show an alert asking for email
@@ -114,32 +97,9 @@ export default function SignInScreen() {
             Sign in to Plan Genie AI
           </Text>
         </View>
-        <Text className="text-base text-muted-foreground mb-4">
+        <Text className="text-base text-muted-foreground mb-6">
           Welcome back! Please sign in to continue
         </Text>
-
-        {/* Google Sign In */}
-        <Button
-          variant="outline"
-          className="flex-row items-center justify-center mb-4"
-          onPress={handleGoogleSignIn}
-        >
-          <View className="flex-row items-center justify-center flex-1">
-            <GoogleIcon
-              size={20}
-              color={isDarkColorScheme ? "#fff" : "#4285F4"}
-              style={{ marginRight: 8 }}
-            />
-            <Text className="font-medium">Google</Text>
-          </View>
-        </Button>
-
-        {/* Divider */}
-        <View className="flex-row items-center my-2">
-          <View className="flex-1 h-px bg-border" />
-          <Text className="mx-2 text-muted-foreground">or</Text>
-          <View className="flex-1 h-px bg-border" />
-        </View>
 
         {/* Email Field */}
         <Text className="font-semibold mb-1 mt-2">Email address</Text>
