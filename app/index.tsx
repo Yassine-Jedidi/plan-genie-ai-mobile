@@ -1,11 +1,9 @@
-import * as React from "react";
-import { View } from "react-native";
-import { Hero } from "~/components/hero";
+import { router } from "expo-router";
+import { useEffect } from "react";
 
-export default function Screen() {
-  return (
-    <View className="flex-1 bg-background">
-      <Hero />
-    </View>
-  );
+export default function IndexRedirect() {
+  useEffect(() => {
+    router.replace("/(tabs)/home");
+  }, []);
+  return null;
 }
