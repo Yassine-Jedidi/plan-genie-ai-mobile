@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -87,89 +88,104 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background justify-center items-center">
-      <View className="w-full max-w-md  rounded-2xl p-6 ">
-        {/* Header */}
-        <View className="flex-row items-center mb-4">
-          <Text className="text-2xl font-bold text-foreground">
-            Sign in to Plan Genie AI
-          </Text>
-        </View>
-        <Text className="text-base text-muted-foreground mb-6">
-          Welcome back! Please sign in to continue
-        </Text>
-
-        {/* Email Field */}
-        <Text className="font-semibold mb-1 mt-2">Email address</Text>
-        <TextInput
-          className="border border-border rounded-md px-4 py-3 mb-3 text-foreground bg-background"
-          placeholder="Email address"
-          placeholderTextColor={isDarkColorScheme ? "#888" : "#aaa"}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        {/* Password Field */}
-        <Text className="font-semibold mb-1">Password</Text>
-        <View className="flex-row items-center border border-border rounded-md px-2 py-1 mb-2 bg-background">
-          <TextInput
-            className="flex-1 px-2 py-2 text-foreground"
-            placeholder="Password"
-            placeholderTextColor={isDarkColorScheme ? "#888" : "#aaa"}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-          />
-          <TouchableOpacity onPress={() => setShowPassword((v) => !v)}>
-            {showPassword ? (
-              <EyeOff size={22} color={isDarkColorScheme ? "#fff" : "#000"} />
-            ) : (
-              <Eye size={22} color={isDarkColorScheme ? "#fff" : "#000"} />
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* Forgot password */}
-        <Pressable onPress={handleForgotPassword} className="mb-4">
-          <Text className="text-primary font-medium">
-            Forgot your password?
-          </Text>
-        </Pressable>
-
-        {/* Error message (conditionally rendered) */}
-        {error ? (
-          <View className="flex-row items-center bg-destructive/90 rounded-lg p-4 mb-4">
-            <Text className="text-destructive-foreground font-medium">
-              {error}
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        enableOnAndroid={true}
+        extraScrollHeight={40}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={{ width: "100%" }}
+      >
+        <View className="w-full max-w-md  rounded-2xl p-6 ">
+          {/* Header */}
+          <View className="flex-row items-center mb-4">
+            <Text className="text-2xl font-bold text-foreground">
+              Sign in to Plan Genie AI
             </Text>
           </View>
-        ) : null}
-
-        {/* Sign in button */}
-        <Button
-          className="mt-2 mb-2 py-3"
-          onPress={handleSignIn}
-          disabled={loading}
-        >
-          <Text className="text-lg font-semibold text-primary-foreground">
-            {loading ? "Signing in..." : "Sign in"}
+          <Text className="text-base text-muted-foreground mb-6">
+            Welcome back! Please sign in to continue
           </Text>
-        </Button>
 
-        {/* Sign up link */}
-        <View className="flex-row justify-center mt-2">
-          <Text className="text-muted-foreground">Don't have an account? </Text>
-          <Pressable
-            onPress={() => {
-              router.push("/sign-up");
-            }}
-          >
-            <Text className="text-primary font-medium">Sign up</Text>
+          {/* Email Field */}
+          <Text className="font-semibold mb-1 mt-2">Email address</Text>
+          <TextInput
+            className="border border-border rounded-md px-4 py-3 mb-3 text-foreground bg-background"
+            placeholder="Email address"
+            placeholderTextColor={isDarkColorScheme ? "#888" : "#aaa"}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
+          {/* Password Field */}
+          <Text className="font-semibold mb-1">Password</Text>
+          <View className="flex-row items-center border border-border rounded-md px-2 py-1 mb-2 bg-background">
+            <TextInput
+              className="flex-1 px-2 py-2 text-foreground"
+              placeholder="Password"
+              placeholderTextColor={isDarkColorScheme ? "#888" : "#aaa"}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword((v) => !v)}>
+              {showPassword ? (
+                <EyeOff size={22} color={isDarkColorScheme ? "#fff" : "#000"} />
+              ) : (
+                <Eye size={22} color={isDarkColorScheme ? "#fff" : "#000"} />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Forgot password */}
+          <Pressable onPress={handleForgotPassword} className="mb-4">
+            <Text className="text-primary font-medium">
+              Forgot your password?
+            </Text>
           </Pressable>
+
+          {/* Error message (conditionally rendered) */}
+          {error ? (
+            <View className="flex-row items-center bg-destructive/90 rounded-lg p-4 mb-4">
+              <Text className="text-destructive-foreground font-medium">
+                {error}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* Sign in button */}
+          <Button
+            className="mt-2 mb-2 py-3"
+            onPress={handleSignIn}
+            disabled={loading}
+          >
+            <Text className="text-lg font-semibold text-primary-foreground">
+              {loading ? "Signing in..." : "Sign in"}
+            </Text>
+          </Button>
+
+          {/* Sign up link */}
+          <View className="flex-row justify-center mt-2">
+            <Text className="text-muted-foreground">
+              Don't have an account?{" "}
+            </Text>
+            <Pressable
+              onPress={() => {
+                router.push("/sign-up");
+              }}
+            >
+              <Text className="text-primary font-medium">Sign up</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
