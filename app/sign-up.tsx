@@ -73,10 +73,10 @@ export default function SignUpScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background justify-center items-center">
       <View className="w-full max-w-md rounded-2xl p-6">
-        <Text className="text-2xl font-bold text-foreground mb-2 text-center">
+        <Text className="text-2xl font-bold text-foreground mb-2">
           Sign up for Plan Genie AI
         </Text>
-        <Text className="text-base text-muted-foreground mb-6 text-center">
+        <Text className="text-base text-muted-foreground mb-6">
           Create your account to get started
         </Text>
 

@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff } from "lucide-react-native";
 import * as React from "react";
 import {
   Alert,
@@ -90,9 +90,6 @@ export default function SignInScreen() {
       <View className="w-full max-w-md  rounded-2xl p-6 ">
         {/* Header */}
         <View className="flex-row items-center mb-4">
-          <Button variant="ghost" onPress={handleBack} className="mr-2">
-            <ArrowLeft size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-          </Button>
           <Text className="text-2xl font-bold text-foreground">
             Sign in to Plan Genie AI
           </Text>

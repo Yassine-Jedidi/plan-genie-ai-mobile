@@ -1,11 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, router } from "expo-router";
+import * as React from "react";
+import { Button } from "~/components/ui/button";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function TabsLayout() {
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.replace("/");
+    } catch (error) {
+      // Optionally handle error (e.g., show a toast)
+      console.error("Sign out failed", error);
+    }
+  };
+
   return (
     <Tabs
       screenOptions={({ route }) => ({
-        headerShown: false,
+        headerShown: true,
+        headerTitle: "",
         tabBarIcon: ({ color, size }) => {
           let iconName;
           switch (route.name) {
@@ -32,6 +48,15 @@ export default function TabsLayout() {
           }
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
+        headerRight: () => (
+          <Button
+            variant="destructive"
+            onPress={handleSignOut}
+            className="flex-row items-center justify-center mr-3 rounded-full p-2"
+          >
+            <Ionicons name="log-out-outline" size={18} color="white" />
+          </Button>
+        ),
       })}
     >
       <Tabs.Screen name="home" options={{ title: "Home" }} />

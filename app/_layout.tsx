@@ -17,6 +17,7 @@ import { Button } from "~/components/ui/button";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
+import { AuthProvider } from "../contexts/AuthContext";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -43,42 +44,44 @@ export default function RootLayout() {
   const { isDarkColorScheme } = useColorScheme();
 
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="index"
-          options={{
-            title: "Plan Genie AI",
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-        <Stack.Screen
-          name="sign-in"
-          options={{
-            title: "Sign In",
-            headerShown: true,
-            headerLeft: () => (
-              <Button variant="ghost" onPress={() => router.back()}>
-                <ArrowLeft
-                  size={24}
-                  color={isDarkColorScheme ? "#fff" : "#000"}
-                />
-              </Button>
-            ),
-          }}
-        />
-        <Stack.Screen
-          name="sign-up"
-          options={{
-            title: "Sign Up",
-            headerShown: true,
-          }}
-        />
-      </Stack>
-      <PortalHost />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+        <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="index"
+            options={{
+              title: "",
+              headerRight: () => <ThemeToggle />,
+            }}
+          />
+          <Stack.Screen
+            name="sign-in"
+            options={{
+              title: "Sign In",
+              headerShown: true,
+              headerLeft: () => (
+                <Button variant="ghost" onPress={() => router.back()}>
+                  <ArrowLeft
+                    size={24}
+                    color={isDarkColorScheme ? "#fff" : "#000"}
+                  />
+                </Button>
+              ),
+            }}
+          />
+          <Stack.Screen
+            name="sign-up"
+            options={{
+              title: "Sign Up",
+              headerShown: true,
+            }}
+          />
+        </Stack>
+        <PortalHost />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 
