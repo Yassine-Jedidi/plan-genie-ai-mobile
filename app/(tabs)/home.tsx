@@ -1,3 +1,4 @@
+import * as chrono from "chrono-node";
 import { Send, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +18,8 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { fastapiAPI, tasksAPI } from "~/services/authAPI";
+import { useColorScheme } from "~/hooks/useColorScheme";
+import { eventsAPI, fastapiAPI, tasksAPI } from "~/services/api";
 
 export default function HomeTab() {
   const [input, setInput] = useState("");
@@ -28,6 +30,9 @@ export default function HomeTab() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [parsedDate, setParsedDate] = useState<string | null>(null);
+  const [parsedDateObject, setParsedDateObject] = useState<Date | null>(null);
+  const { isDarkColorScheme } = useColorScheme();
 
   useEffect(() => {
     if (result) {
@@ -70,6 +75,64 @@ export default function HomeTab() {
     });
   }, [editableResult?.type]);
 
+  useEffect(() => {
+    if (!editableResult) {
+      setParsedDate(null);
+      setParsedDateObject(null);
+      return;
+    }
+    const type = editableResult.type;
+    let dateStr: string | null = null;
+    let dateObj: Date | null = null;
+    if (type === "Tâche") {
+      const delai = editableResult.entities.DELAI;
+      if (typeof delai === "string" && delai.trim()) {
+        let date: Date | null = chrono.fr.parseDate(delai);
+        if (!date) date = chrono.parseDate(delai) as Date | null;
+        if (date !== null) {
+          dateObj = date;
+          const options: Intl.DateTimeFormatOptions = {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          };
+          dateStr = `Interpreted as: ${date.toLocaleDateString(
+            "en-US",
+            options
+          )}`;
+        }
+      }
+    } else if (type === "Événement") {
+      const dateHeure = editableResult.entities.DATE_HEURE;
+      if (typeof dateHeure === "string" && dateHeure.trim()) {
+        let date: Date | null = chrono.fr.parseDate(dateHeure);
+        if (!date) date = chrono.parseDate(dateHeure) as Date | null;
+        if (date !== null) {
+          dateObj = date;
+          const options: Intl.DateTimeFormatOptions = {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          };
+          dateStr = `Interpreted as: ${date.toLocaleDateString(
+            "en-US",
+            options
+          )}`;
+        }
+      }
+    }
+    setParsedDate(dateStr);
+    setParsedDateObject(dateObj);
+  }, [editableResult]);
+
   const handleSend = async () => {
     if (!input.trim()) return;
     setLoading(true);
@@ -100,6 +163,7 @@ export default function HomeTab() {
         updated.entities[entityKey] = [...updated.entities[entityKey]];
         updated.entities[entityKey][idx] = value;
       } else {
+        // If it's not an array, just set the value directly
         updated.entities[entityKey] = value;
       }
       return updated;
@@ -112,14 +176,44 @@ export default function HomeTab() {
     setSaveSuccess(null);
     setSaveError(null);
     try {
-      const result = await tasksAPI.saveTask(
-        editableResult.type,
-        editableResult.entities
-      );
+      // Create a copy of entities and convert back to array format for backend
+      const entitiesToSave: any = {};
+      Object.keys(editableResult.entities).forEach((key) => {
+        const value = editableResult.entities[key];
+        // Convert string values back to arrays as expected by backend
+        entitiesToSave[key] = Array.isArray(value) ? value : [value];
+      });
+
+      if (
+        editableResult.type === "Tâche" &&
+        parsedDateObject &&
+        entitiesToSave.DELAI
+      ) {
+        // Preserve the original text as DELAI_TEXT for deadline_text
+        entitiesToSave.DELAI_TEXT = entitiesToSave.DELAI;
+        // Set the parsed date as DELAI for the actual deadline
+        entitiesToSave.DELAI = [parsedDateObject.toISOString()];
+      } else if (
+        editableResult.type === "Événement" &&
+        parsedDateObject &&
+        entitiesToSave.DATE_HEURE
+      ) {
+        // For events: DATE_HEURE contains original text, DATE_HEURE_PARSED contains parsed date
+        // The backend expects DATE_HEURE[0] for date_time_text and DATE_HEURE_PARSED[0] for date_time
+        entitiesToSave.DATE_HEURE_PARSED = [parsedDateObject.toISOString()];
+        // Keep DATE_HEURE as the original text for date_time_text
+      }
+
+      const result =
+        editableResult.type === "Tâche"
+          ? await tasksAPI.saveTask(editableResult.type, entitiesToSave)
+          : await eventsAPI.saveEvent(editableResult.type, entitiesToSave);
       console.log("Save result:", result);
       setSaveSuccess("Task saved successfully!");
       setEditableResult(null);
       setResult(null);
+      setParsedDate(null);
+      setParsedDateObject(null);
       Toast.show({
         type: "success",
         text1: `Your ${
@@ -255,12 +349,23 @@ export default function HomeTab() {
                       </Text>
                       <Input
                         className="flex-1 rounded px-2 py-1 border border-border bg-background"
-                        value={editableResult.entities[key] ?? ""}
+                        value={String(editableResult.entities[key] ?? "")}
                         onChangeText={(text) =>
                           handleEntityChange(key, text, 0)
                         }
                       />
                     </View>
+                    {/* Show parsed date for DELAI or DATE_HEURE */}
+                    {((key === "DELAI" && editableResult.type === "Tâche") ||
+                      (key === "DATE_HEURE" &&
+                        editableResult.type === "Événement")) &&
+                      parsedDate && (
+                        <View className="ml-2 mb-1">
+                          <Text className="text-xs text-muted-foreground">
+                            {parsedDate}
+                          </Text>
+                        </View>
+                      )}
                     {idx < arr.length - 1 && (
                       <View className="h-px bg-border opacity-60 mx-1" />
                     )}
@@ -308,7 +413,7 @@ export default function HomeTab() {
             onPress={handleSend}
             disabled={loading}
           >
-            <Send size={14} color="#fff" />
+            <Send size={14} color={isDarkColorScheme ? "#000" : "#fff"} />
           </Button>
         </View>
       </KeyboardAvoidingView>

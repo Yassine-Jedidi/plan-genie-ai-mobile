@@ -117,24 +117,4 @@ export const authAPI = {
   },
 };
 
-// FastAPI Proxy API Service
-export const fastapiAPI = {
-  analyzeText: async (text: string) => {
-    return apiRequest('/api/analyze-text', {
-      method: 'POST',
-      body: JSON.stringify({ text }),
-    });
-  },
-};
-
-// Tasks API Service
-export const tasksAPI = {
-  saveTask: async (type: string, entities: any) => {
-    return apiRequest('/tasks/save', {
-      method: 'POST',
-      body: JSON.stringify({ type, entities }),
-    });
-  },
-};
-
 export default authAPI;
