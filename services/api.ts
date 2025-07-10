@@ -34,6 +34,38 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   }
 };
 
+// Generic file upload request function
+const fileUploadRequest = async (endpoint: string, file: any, options: RequestInit = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const defaultOptions: RequestInit = {
+    ...options,
+    method: 'POST',
+    headers: {
+      'User-Agent': 'Plan-Genie-Mobile-App/1.0 (Expo)',
+      ...options.headers,
+    },
+    body: formData,
+  };
+
+  try {
+    const response = await fetch(url, defaultOptions);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('File Upload Error:', error);
+    throw error;
+  }
+};
+
 // FastAPI Proxy API Service
 export const fastapiAPI = {
   analyzeText: async (text: string) => {
@@ -41,6 +73,10 @@ export const fastapiAPI = {
       method: 'POST',
       body: JSON.stringify({ text }),
     });
+  },
+  
+  transcribeAudio: async (audioFile: any) => {
+    return fileUploadRequest('/audio/transcribe', audioFile);
   },
 };
 

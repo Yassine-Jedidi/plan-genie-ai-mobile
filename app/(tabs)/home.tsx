@@ -1,7 +1,9 @@
 import * as chrono from "chrono-node";
-import { Send, X } from "lucide-react-native";
+import { Audio } from "expo-av";
+import { Mic, MicOff, Send, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -32,7 +34,127 @@ export default function HomeTab() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [parsedDate, setParsedDate] = useState<string | null>(null);
   const [parsedDateObject, setParsedDateObject] = useState<Date | null>(null);
+
+  // Audio recording states
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingPermission, setRecordingPermission] = useState<
+    boolean | null
+  >(null);
+  const [transcribing, setTranscribing] = useState(false);
+
   const { isDarkColorScheme } = useColorScheme();
+
+  // Request recording permissions on component mount
+  useEffect(() => {
+    (async () => {
+      const { status } = await Audio.requestPermissionsAsync();
+      setRecordingPermission(status === "granted");
+    })();
+  }, []);
+
+  // Audio recording functions
+  const startRecording = async () => {
+    try {
+      if (recordingPermission !== true) {
+        Alert.alert(
+          "Permission Required",
+          "Please grant microphone permission to record audio."
+        );
+        return;
+      }
+
+      // Configure audio mode
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      // Start recording
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+
+      setRecording(recording);
+      setIsRecording(true);
+
+      Toast.show({
+        type: "info",
+        text1: "Recording started",
+        text2: "Tap the microphone again to stop",
+        position: "top",
+      });
+    } catch (err) {
+      console.error("Failed to start recording", err);
+      Alert.alert("Error", "Failed to start recording. Please try again.");
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recording) return;
+
+    try {
+      setIsRecording(false);
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecording(null);
+
+      if (uri) {
+        await handleTranscription(uri);
+      }
+    } catch (err) {
+      console.error("Failed to stop recording", err);
+      Alert.alert("Error", "Failed to stop recording. Please try again.");
+    }
+  };
+
+  const handleTranscription = async (audioUri: string) => {
+    setTranscribing(true);
+    setError(null);
+
+    try {
+      // Create a file object from the audio URI
+      const audioFile = {
+        uri: audioUri,
+        type: "audio/wav",
+        name: "recording.wav",
+      };
+
+      // Send to transcription API
+      const transcriptionResult = await fastapiAPI.transcribeAudio(audioFile);
+
+      if (transcriptionResult.transcription) {
+        setInput(transcriptionResult.transcription);
+        Toast.show({
+          type: "success",
+          text1: "Transcription complete",
+          text2: "Your voice has been converted to text",
+          position: "top",
+        });
+      } else {
+        throw new Error("No transcription received");
+      }
+    } catch (err: any) {
+      console.error("Transcription error:", err);
+      setError("Failed to transcribe audio. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Transcription failed",
+        text2: err.message || "Please try again",
+        position: "top",
+      });
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const handleMicPress = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
 
   useEffect(() => {
     if (result) {
@@ -278,6 +400,13 @@ export default function HomeTab() {
             <Text className="text-base text-destructive">{error}</Text>
           </View>
         )}
+        {transcribing && (
+          <View className="items-center mt-2">
+            <Text className="text-base text-muted-foreground">
+              Transcribing your voice...
+            </Text>
+          </View>
+        )}
         {editableResult && (
           <View className="px-4 mt-2 mb-2">
             <View
@@ -405,13 +534,32 @@ export default function HomeTab() {
             onChangeText={setInput}
             returnKeyType="send"
             onSubmitEditing={handleSend}
-            editable={!loading}
+            editable={!loading && !transcribing}
           />
+          {/* Microphone button */}
+          <Button
+            size="icon"
+            className={`rounded-full mr-2 ${
+              isRecording
+                ? "bg-red-500"
+                : transcribing
+                ? "bg-muted"
+                : "bg-secondary"
+            }`}
+            onPress={handleMicPress}
+            disabled={loading || transcribing || recordingPermission === false}
+          >
+            {isRecording ? (
+              <MicOff size={14} color="#fff" />
+            ) : (
+              <Mic size={14} color={isDarkColorScheme ? "#fff" : "#000"} />
+            )}
+          </Button>
           <Button
             size="icon"
             className="rounded-full bg-primary active:opacity-80"
             onPress={handleSend}
-            disabled={loading}
+            disabled={loading || transcribing}
           >
             <Send size={14} color={isDarkColorScheme ? "#000" : "#fff"} />
           </Button>
