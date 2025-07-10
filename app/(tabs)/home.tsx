@@ -164,87 +164,110 @@ export default function HomeTab() {
           </View>
         )}
         {editableResult && (
-          <View className="px-4 mt-2 mb-2 relative">
-            {/* X icon to clear results */}
-            <Button
-              size="icon"
-              variant="destructive"
-              className="absolute right-0 top-0 z-10"
-              onPress={() => {
-                setEditableResult(null);
-                setResult(null);
-                setSaveSuccess(null);
-                setSaveError(null);
-              }}
+          <View className="px-4 mt-2 mb-2">
+            <View
+              className="relative rounded-2xl bg-card shadow-lg p-5 border border-border"
+              style={{ elevation: 4 }}
             >
-              <X size={18} color="#888" />
-            </Button>
-            <Text className="text-base font-semibold text-foreground mb-1">
-              Type:
-            </Text>
-            <View className="mb-2 border border-border rounded">
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <View className="flex-row items-center justify-between px-3 py-2">
-                    <Text className="text-base text-foreground">
-                      {editableResult.type}
-                    </Text>
-                    <Text className="text-base text-foreground">▼</Text>
-                  </View>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuRadioGroup
-                    value={editableResult.type}
-                    onValueChange={(itemValue) =>
-                      setEditableResult((prev: any) => ({
-                        ...prev,
-                        type: itemValue,
-                      }))
-                    }
-                  >
-                    <DropdownMenuRadioItem value="Tâche">
-                      <Text>Tâche</Text>
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="Événement">
-                      <Text>Événement</Text>
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </View>
-            {(REQUIRED_ENTITIES[editableResult.type] || []).map((key) => (
-              <View key={key} className="flex-row items-center mb-1">
-                <Text className="text-base text-foreground mr-2">
-                  {ENTITY_LABELS[key] || key}:
-                </Text>
-                <Input
-                  className="flex-1 rounded px-2 py-1 border border-border"
-                  value={editableResult.entities[key] ?? ""}
-                  onChangeText={(text) => handleEntityChange(key, text, 0)}
-                />
-              </View>
-            ))}
-            {/* Save button and status */}
-            <View className="mt-3 flex-row items-center">
+              {/* X icon to clear results */}
               <Button
-                className="bg-primary px-4 py-2 rounded-full"
-                onPress={handleSave}
-                disabled={saveLoading}
+                size="icon"
+                variant="ghost"
+                className="absolute right-3 top-3 z-10 bg-white/80 border border-border shadow-sm"
+                onPress={() => {
+                  setEditableResult(null);
+                  setResult(null);
+                  setSaveSuccess(null);
+                  setSaveError(null);
+                }}
               >
-                <Text className="text-primary-foreground font-semibold">
-                  {saveLoading ? "Saving..." : "Save"}
-                </Text>
+                <X size={18} color="#888" />
               </Button>
-              {saveSuccess && (
-                <Text className="ml-3 text-green-600 font-medium">
-                  {saveSuccess}
+              {/* Type with icon */}
+              <View className="flex-row items-center mb-3">
+                <View className="w-8 h-8 rounded-full bg-primary/10 items-center justify-center mr-3">
+                  <Text className="text-lg">
+                    {editableResult.type === "Tâche" ? "📝" : "📅"}
+                  </Text>
+                </View>
+                <Text className="text-lg font-bold text-foreground">
+                  {editableResult.type}
                 </Text>
+              </View>
+              <View className="mb-2 border border-border rounded overflow-hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <View className="flex-row items-center justify-between px-3 py-2 bg-muted">
+                      <Text className="text-base text-foreground">
+                        {editableResult.type}
+                      </Text>
+                      <Text className="text-base text-foreground">▼</Text>
+                    </View>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuRadioGroup
+                      value={editableResult.type}
+                      onValueChange={(itemValue) =>
+                        setEditableResult((prev: any) => ({
+                          ...prev,
+                          type: itemValue,
+                        }))
+                      }
+                    >
+                      <DropdownMenuRadioItem value="Tâche">
+                        <Text>Tâche</Text>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Événement">
+                        <Text>Événement</Text>
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </View>
+              {/* Entity fields with dividers */}
+              {(REQUIRED_ENTITIES[editableResult.type] || []).map(
+                (key, idx, arr) => (
+                  <View key={key}>
+                    <View className="flex-row items-center py-2">
+                      <Text className="text-base text-foreground mr-2 min-w-[80px]">
+                        {ENTITY_LABELS[key] || key}:
+                      </Text>
+                      <Input
+                        className="flex-1 rounded px-2 py-1 border border-border bg-background"
+                        value={editableResult.entities[key] ?? ""}
+                        onChangeText={(text) =>
+                          handleEntityChange(key, text, 0)
+                        }
+                      />
+                    </View>
+                    {idx < arr.length - 1 && (
+                      <View className="h-px bg-border opacity-60 mx-1" />
+                    )}
+                  </View>
+                )
               )}
-              {saveError && (
-                <Text className="ml-3 text-destructive font-medium">
-                  {saveError}
-                </Text>
-              )}
+              {/* Save button and status */}
+              <View className="mt-4 flex-row items-center justify-end">
+                <Button
+                  className="bg-primary px-4 py-2 rounded-full shadow-md"
+                  onPress={handleSave}
+                  disabled={saveLoading}
+                >
+                  <Text className="text-primary-foreground font-semibold">
+                    {saveLoading ? "Saving..." : "Save"}
+                  </Text>
+                </Button>
+                {saveSuccess && (
+                  <Text className="ml-3 text-green-600 font-medium">
+                    {saveSuccess}
+                  </Text>
+                )}
+                {saveError && (
+                  <Text className="ml-3 text-destructive font-medium">
+                    {saveError}
+                  </Text>
+                )}
+              </View>
             </View>
           </View>
         )}
