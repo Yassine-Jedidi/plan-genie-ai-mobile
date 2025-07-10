@@ -12,11 +12,13 @@ import { StatusBar } from "expo-status-bar";
 import { ArrowLeft } from "lucide-react-native";
 import * as React from "react";
 import { Appearance, Platform } from "react-native";
+import Toast from "react-native-toast-message";
 import { ThemeToggle } from "~/components/themeToggle";
 import { Button } from "~/components/ui/button";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
+import CustomToast from "../components/CustomToast";
 import { AuthProvider } from "../contexts/AuthContext";
 
 const LIGHT_THEME: Theme = {
@@ -80,6 +82,12 @@ export default function RootLayout() {
           />
         </Stack>
         <PortalHost />
+        <Toast
+          config={{
+            success: (props) => <CustomToast {...props} />,
+            error: (props) => <CustomToast {...props} />,
+          }}
+        />
       </ThemeProvider>
     </AuthProvider>
   );

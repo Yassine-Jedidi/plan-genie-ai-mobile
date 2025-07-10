@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -117,8 +118,28 @@ export default function HomeTab() {
       );
       console.log("Save result:", result);
       setSaveSuccess("Task saved successfully!");
+      setEditableResult(null);
+      setResult(null);
+      Toast.show({
+        type: "success",
+        text1: `Your ${
+          editableResult.type === "Tâche" ? "task" : "event"
+        } has been saved.`,
+        text2: "You can now view it in your task list.",
+        position: "top",
+      });
     } catch (err: any) {
       setSaveError(err.message || "Failed to save task.");
+      Toast.show({
+        type: "error",
+        text1: "Save failed",
+        text2:
+          err.message ||
+          `Failed to save ${
+            editableResult.type === "Tâche" ? "task" : "event"
+          }.`,
+        position: "top",
+      });
     } finally {
       setSaveLoading(false);
     }
@@ -274,7 +295,7 @@ export default function HomeTab() {
         <View className="flex-row items-center px-4 py-3 bg-background">
           <Input
             className="flex-1 rounded-full px-4 py-2 mr-2"
-            placeholder="Enter your task text here..."
+            placeholder="Enter your task or event text here..."
             value={input}
             onChangeText={setInput}
             returnKeyType="send"
