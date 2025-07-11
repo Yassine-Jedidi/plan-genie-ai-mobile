@@ -326,7 +326,13 @@ export default function HomeTab() {
 
       // Use classified priority for tasks
       if (editableResult.type === "Tâche" && entitiesToSave.PRIORITE) {
-        entitiesToSave.PRIORITE = [classifiedPriority];
+        // Convert priority level to database format: "Low", "Medium", "High"
+        const priorityMap: Record<PriorityLevel, string> = {
+          low: "Low",
+          medium: "Medium",
+          high: "High",
+        };
+        entitiesToSave.PRIORITE = [priorityMap[classifiedPriority]];
       }
 
       if (
