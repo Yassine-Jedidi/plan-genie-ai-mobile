@@ -88,6 +88,22 @@ export const tasksAPI = {
       body: JSON.stringify({ type, entities }),
     });
   },
+  getTasks: async () => {
+    return apiRequest('/tasks', {
+      method: 'GET',
+    });
+  },
+  updateTask: async (taskId: string, taskData: any) => {
+    return apiRequest(`/tasks/${taskId}`, {
+      method: 'PUT',
+      body: JSON.stringify(taskData),
+    });
+  },
+  deleteTask: async (taskId: string) => {
+    return apiRequest(`/tasks/${taskId}`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 // Events API Service

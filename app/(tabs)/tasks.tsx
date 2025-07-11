@@ -1,9 +1,542 @@
-import { Text, View } from "react-native";
+import { router } from "expo-router";
+import {
+  Calendar,
+  CheckCircle,
+  Circle,
+  Clock,
+  Trash2,
+} from "lucide-react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SwipeListView } from "react-native-swipe-list-view";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { useAuth } from "../../contexts/AuthContext";
+import { tasksAPI } from "../../services/api";
+import { priorityService } from "../../services/priority";
+
+interface Task {
+  id: string;
+  title: string;
+  deadline: string | null;
+  deadline_text: string | null;
+  priority: string | null;
+  status: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
+
+type DateFilter =
+  | "all"
+  | "today"
+  | "tomorrow"
+  | "this-week"
+  | "overdue"
+  | "completed";
 
 export default function TasksTab() {
+  const { user, loading: authLoading } = useAuth();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<DateFilter>("all");
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/sign-in");
+    }
+  }, [user, authLoading]);
+
+  const fetchTasks = async () => {
+    if (!user) return;
+    try {
+      setError(null);
+      const data = await tasksAPI.getTasks();
+      setTasks(data);
+    } catch (err) {
+      setError("Failed to load tasks. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchTasks();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchTasks();
+    }
+  }, [user]);
+
+  // Filter tasks based on selected date filter
+  useEffect(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    let filtered = tasks;
+
+    switch (selectedFilter) {
+      case "today":
+        filtered = tasks.filter((task) => {
+          if (!task.deadline) return false;
+          const taskDate = new Date(task.deadline);
+          const taskDay = new Date(
+            taskDate.getFullYear(),
+            taskDate.getMonth(),
+            taskDate.getDate()
+          );
+          return taskDay.getTime() === today.getTime();
+        });
+        break;
+      case "tomorrow":
+        filtered = tasks.filter((task) => {
+          if (!task.deadline) return false;
+          const taskDate = new Date(task.deadline);
+          const taskDay = new Date(
+            taskDate.getFullYear(),
+            taskDate.getMonth(),
+            taskDate.getDate()
+          );
+          return taskDay.getTime() === tomorrow.getTime();
+        });
+        break;
+      case "this-week":
+        filtered = tasks.filter((task) => {
+          if (!task.deadline) return false;
+          const taskDate = new Date(task.deadline);
+          return taskDate >= today && taskDate < nextWeek;
+        });
+        break;
+      case "overdue":
+        filtered = tasks.filter((task) => {
+          if (!task.deadline || task.status === "Done") return false;
+          return new Date(task.deadline) < today;
+        });
+        break;
+      case "completed":
+        filtered = tasks.filter((task) => task.status === "Done");
+        break;
+      case "all":
+      default:
+        filtered = tasks;
+        break;
+    }
+
+    setFilteredTasks(filtered);
+  }, [tasks, selectedFilter]);
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "No deadline";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  const getDueIn = (deadline: string | null) => {
+    if (!deadline) return "No deadline";
+    try {
+      const deadlineDate = new Date(deadline);
+      const now = new Date();
+      const diffTime = deadlineDate.getTime() - now.getTime();
+
+      if (diffTime < 0) {
+        // Overdue
+        const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 30) {
+          const months = Math.floor(diffDays / 30);
+          return `${months} month${months !== 1 ? "s" : ""} overdue`;
+        } else if (diffDays >= 1) {
+          return `${diffDays} day${diffDays !== 1 ? "s" : ""} overdue`;
+        } else {
+          const diffHours = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60));
+          return `${diffHours} hour${diffHours !== 1 ? "s" : ""} overdue`;
+        }
+      } else if (diffTime === 0) {
+        return "Due now";
+      } else {
+        // Future deadline
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+
+        if (diffDays >= 30) {
+          const months = Math.floor(diffDays / 30);
+          return `Due in ${months} month${months !== 1 ? "s" : ""}`;
+        } else if (diffDays >= 1) {
+          return `Due in ${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+        } else if (diffHours >= 1) {
+          return `Due in ${diffHours} hour${diffHours !== 1 ? "s" : ""}`;
+        } else {
+          const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+          return `Due in ${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""}`;
+        }
+      }
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  const getPriorityVariant = (priority: string | null) => {
+    if (!priority) return "medium";
+    const classifiedPriority = priorityService.classifyPriority(priority);
+    return classifiedPriority as "high" | "medium" | "low";
+  };
+
+  const getStatusVariant = (status: string | null) => {
+    if (!status) return "planned";
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes("done") || statusLower.includes("completed"))
+      return "done";
+    if (statusLower.includes("progress")) return "in-progress";
+    return "planned";
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    Alert.alert("Delete Task", "Are you sure you want to delete this task?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await tasksAPI.deleteTask(taskId);
+            setTasks(tasks.filter((task) => task.id !== taskId));
+          } catch (err) {
+            Alert.alert("Error", "Failed to delete task. Please try again.");
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleStatusToggle = async (task: Task) => {
+    let newStatus: string;
+    let newCompletedAt: string | null = null;
+    let confirmMessage: string;
+
+    // Determine what the next status will be
+    switch (task.status) {
+      case "Done":
+        newStatus = "Planned";
+        newCompletedAt = null;
+        confirmMessage = `Do you want to change "${task.title}" status to Planned?`;
+        break;
+      case "In Progress":
+        newStatus = "Done";
+        newCompletedAt = new Date().toISOString();
+        confirmMessage = `Do you want to mark "${task.title}" as Done?`;
+        break;
+      case "Planned":
+      default:
+        newStatus = "In Progress";
+        newCompletedAt = null;
+        confirmMessage = `Do you want to change "${task.title}" status to In Progress?`;
+        break;
+    }
+
+    // Show confirmation dialog
+    Alert.alert("Change Status", confirmMessage, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Yes",
+        onPress: async () => {
+          try {
+            await tasksAPI.updateTask(task.id, {
+              title: task.title,
+              deadline: task.deadline,
+              priority: task.priority,
+              status: newStatus,
+              completed_at: newCompletedAt,
+            });
+            setTasks(
+              tasks.map((t) =>
+                t.id === task.id
+                  ? { ...t, status: newStatus, completed_at: newCompletedAt }
+                  : t
+              )
+            );
+          } catch (err) {
+            Alert.alert("Error", "Failed to update task. Please try again.");
+          }
+        },
+      },
+    ]);
+  };
+
+  const renderItem = useCallback(
+    ({ item }: { item: Task }) => {
+      const isOverdue =
+        item.deadline &&
+        new Date(item.deadline) < new Date() &&
+        item.status !== "Done";
+      return (
+        <View
+          className={`flex-row items-center bg-white border-b border-gray-200 py-4 px-5 ${
+            isOverdue ? "border-l-4 border-l-red-500 bg-red-50" : ""
+          }`}
+        >
+          <View className="flex-1">
+            <Text
+              className="text-base font-semibold text-gray-900 mb-1"
+              numberOfLines={2}
+            >
+              {item.title}
+            </Text>
+            <View className="flex-row items-center mt-1 mb-1 gap-1">
+              <Badge variant={getPriorityVariant(item.priority)}>
+                {item.priority
+                  ? priorityService.getPriorityLabel(
+                      getPriorityVariant(item.priority)
+                    )
+                  : "Medium"}
+              </Badge>
+              <Badge variant={getStatusVariant(item.status)}>
+                {item.status || "Planned"}
+              </Badge>
+            </View>
+            <View className="flex-row items-center mt-1 space-x-2">
+              <Calendar size={16} color="#6b7280" />
+              <Text className="text-sm text-gray-600 ml-1">
+                {formatDate(item.deadline)}
+              </Text>
+            </View>
+            <View className="flex-row items-center mt-1 space-x-2">
+              <Clock size={16} color="#6b7280" />
+              <Text className="text-sm text-gray-600 ml-1">
+                {getDueIn(item.deadline)}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            onPress={() => handleStatusToggle(item)}
+            className="ml-3"
+          >
+            {item.status === "Done" ? (
+              <CheckCircle size={28} color="#22c55e" />
+            ) : item.status === "In Progress" ? (
+              <View className="w-7 h-7 rounded-full border-2 border-orange-500 bg-orange-100 items-center justify-center">
+                <View className="w-2 h-2 rounded-full bg-orange-500" />
+              </View>
+            ) : (
+              <Circle size={28} color="#6b7280" />
+            )}
+          </TouchableOpacity>
+        </View>
+      );
+    },
+    [tasks]
+  );
+
+  const renderHiddenItem = useCallback(
+    ({ item }: { item: Task }) => (
+      <View className="items-center bg-red-500 flex-1 flex-row justify-end pr-6 border-b border-gray-200">
+        <TouchableOpacity
+          className="items-center justify-center w-16 h-full"
+          onPress={() => handleDeleteTask(item.id)}
+        >
+          <Trash2 size={24} color="#fff" />
+          <Text className="text-white text-xs mt-1">Delete</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+    [tasks]
+  );
+
+  const FilterChip = ({
+    filter,
+    label,
+    count,
+  }: {
+    filter: DateFilter;
+    label: string;
+    count: number;
+  }) => (
+    <TouchableOpacity
+      className={`px-4 py-2.5 rounded-full border mr-2 ${
+        selectedFilter === filter
+          ? "bg-blue-500 border-blue-500 shadow-sm"
+          : "bg-gray-50 border-gray-200"
+      }`}
+      onPress={() => setSelectedFilter(filter)}
+      activeOpacity={0.7}
+    >
+      <Text
+        className={`text-sm font-medium ${
+          selectedFilter === filter ? "text-white" : "text-gray-700"
+        }`}
+      >
+        {label} ({count})
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const getFilterCount = (filter: DateFilter) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    switch (filter) {
+      case "today":
+        return tasks.filter((task) => {
+          if (!task.deadline) return false;
+          const taskDate = new Date(task.deadline);
+          const taskDay = new Date(
+            taskDate.getFullYear(),
+            taskDate.getMonth(),
+            taskDate.getDate()
+          );
+          return taskDay.getTime() === today.getTime();
+        }).length;
+      case "tomorrow":
+        return tasks.filter((task) => {
+          if (!task.deadline) return false;
+          const taskDate = new Date(task.deadline);
+          const taskDay = new Date(
+            taskDate.getFullYear(),
+            taskDate.getMonth(),
+            taskDate.getDate()
+          );
+          return taskDay.getTime() === tomorrow.getTime();
+        }).length;
+      case "this-week":
+        return tasks.filter((task) => {
+          if (!task.deadline) return false;
+          const taskDate = new Date(task.deadline);
+          return taskDate >= today && taskDate < nextWeek;
+        }).length;
+      case "overdue":
+        return tasks.filter((task) => {
+          if (!task.deadline || task.status === "Done") return false;
+          return new Date(task.deadline) < today;
+        }).length;
+      case "completed":
+        return tasks.filter((task) => task.status === "Done").length;
+      case "all":
+      default:
+        return tasks.length;
+    }
+  };
+
+  if (authLoading || loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white p-6">
+        <Text className="text-lg text-gray-900">Loading tasks...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white p-6">
+        <Text className="text-base text-red-500 mb-4">{error}</Text>
+        <Button onPress={fetchTasks}>
+          <Text className="text-white">Retry</Text>
+        </Button>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1 items-center justify-center bg-background">
-      <Text className="text-2xl font-bold text-foreground">Tasks</Text>
+    <View className="flex-1 bg-white">
+      <View className="flex-row justify-between items-center px-5 pt-6 pb-3 bg-white">
+        <Text className="text-2xl font-bold text-gray-900">Tasks</Text>
+        <Text className="text-sm text-gray-500">
+          {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
+        </Text>
+      </View>
+
+      {/* Filter Chips */}
+      <View className="bg-white border-b border-gray-200">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="px-5 py-3"
+          contentContainerStyle={{ paddingRight: 20 }}
+        >
+          <FilterChip filter="all" label="All" count={getFilterCount("all")} />
+          <FilterChip
+            filter="today"
+            label="Today"
+            count={getFilterCount("today")}
+          />
+          <FilterChip
+            filter="tomorrow"
+            label="Tomorrow"
+            count={getFilterCount("tomorrow")}
+          />
+          <FilterChip
+            filter="this-week"
+            label="This Week"
+            count={getFilterCount("this-week")}
+          />
+          <FilterChip
+            filter="overdue"
+            label="Overdue"
+            count={getFilterCount("overdue")}
+          />
+          <FilterChip
+            filter="completed"
+            label="Completed"
+            count={getFilterCount("completed")}
+          />
+        </ScrollView>
+      </View>
+
+      <SwipeListView
+        data={filteredTasks}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        renderHiddenItem={renderHiddenItem}
+        rightOpenValue={-90}
+        disableRightSwipe={true}
+        leftOpenValue={90}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 0 }}
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center bg-white p-6">
+            <Text className="text-lg text-gray-500 mb-2 text-center">
+              No tasks found
+            </Text>
+            <Text className="text-sm text-gray-400 text-center">
+              {selectedFilter === "all"
+                ? "Create your first task to get started"
+                : `No tasks for ${selectedFilter.replace("-", " ")}`}
+            </Text>
+          </View>
+        }
+      />
     </View>
   );
 }
