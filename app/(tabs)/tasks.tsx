@@ -4,6 +4,7 @@ import {
   CheckCircle,
   Circle,
   Clock,
+  Edit,
   Trash2,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
@@ -16,9 +17,11 @@ import {
   View,
 } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
+import { EditTaskDialog } from "../../components/EditTaskDialog";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { useAuth } from "../../contexts/AuthContext";
+import { useColorScheme } from "../../hooks/useColorScheme";
 import { tasksAPI } from "../../services/api";
 import { priorityService } from "../../services/priority";
 
@@ -45,12 +48,15 @@ type DateFilter =
 
 export default function TasksTab() {
   const { user, loading: authLoading } = useAuth();
+  const { isDarkColorScheme } = useColorScheme();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<DateFilter>("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editDialogVisible, setEditDialogVisible] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -290,6 +296,20 @@ export default function TasksTab() {
     ]);
   };
 
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setEditDialogVisible(true);
+  };
+
+  const handleEditDialogClose = () => {
+    setEditDialogVisible(false);
+    setSelectedTask(null);
+  };
+
+  const handleTaskUpdated = () => {
+    fetchTasks(); // Refresh the tasks list
+  };
+
   const renderItem = useCallback(
     ({ item }: { item: Task }) => {
       const isOverdue =
@@ -298,13 +318,13 @@ export default function TasksTab() {
         item.status !== "Done";
       return (
         <View
-          className={`flex-row items-center bg-white border-b border-gray-200 py-4 px-5 ${
-            isOverdue ? "border-l-4 border-l-red-500 bg-red-50" : ""
+          className={`flex-row items-center border-b border-border py-4 px-5 ${
+            isOverdue ? "border-l-4 border-l-red-500 bg-card" : "bg-card"
           }`}
         >
           <View className="flex-1">
             <Text
-              className="text-base font-semibold text-gray-900 mb-1"
+              className="text-base font-semibold text-foreground mb-1"
               numberOfLines={2}
             >
               {item.title}
@@ -322,14 +342,20 @@ export default function TasksTab() {
               </Badge>
             </View>
             <View className="flex-row items-center mt-1 space-x-2">
-              <Calendar size={16} color="#6b7280" />
-              <Text className="text-sm text-gray-600 ml-1">
+              <Calendar
+                size={16}
+                color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
+              />
+              <Text className="text-sm text-muted-foreground ml-1">
                 {formatDate(item.deadline)}
               </Text>
             </View>
             <View className="flex-row items-center mt-1 space-x-2">
-              <Clock size={16} color="#6b7280" />
-              <Text className="text-sm text-gray-600 ml-1">
+              <Clock
+                size={16}
+                color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
+              />
+              <Text className="text-sm text-muted-foreground ml-1">
                 {getDueIn(item.deadline)}
               </Text>
             </View>
@@ -341,27 +367,34 @@ export default function TasksTab() {
             {item.status === "Done" ? (
               <CheckCircle size={28} color="#22c55e" />
             ) : item.status === "In Progress" ? (
-              <View className="w-7 h-7 rounded-full border-2 border-orange-500 bg-orange-100 items-center justify-center">
-                <View className="w-2 h-2 rounded-full bg-orange-500" />
+              <View className="w-7 h-7 rounded-full border-2 border-blue-500 bg-blue-100 items-center justify-center">
+                <View className="w-2 h-2 rounded-full bg-blue-500" />
               </View>
             ) : (
-              <Circle size={28} color="#6b7280" />
+              <Circle size={28} color="#f97316" />
             )}
           </TouchableOpacity>
         </View>
       );
     },
-    [tasks]
+    [tasks, isDarkColorScheme]
   );
 
   const renderHiddenItem = useCallback(
     ({ item }: { item: Task }) => (
-      <View className="items-center bg-red-500 flex-1 flex-row justify-end pr-6 border-b border-gray-200">
+      <View className="items-center flex-1 flex-row justify-end border-b border-border">
         <TouchableOpacity
-          className="items-center justify-center w-16 h-full"
+          className="items-center justify-center w-16 h-full bg-orange-500"
+          onPress={() => handleEditTask(item)}
+        >
+          <Edit size={20} color="#fff" />
+          <Text className="text-white text-xs mt-1">Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="items-center justify-center w-16 h-full bg-red-500"
           onPress={() => handleDeleteTask(item.id)}
         >
-          <Trash2 size={24} color="#fff" />
+          <Trash2 size={20} color="#fff" />
           <Text className="text-white text-xs mt-1">Delete</Text>
         </TouchableOpacity>
       </View>
@@ -381,15 +414,17 @@ export default function TasksTab() {
     <TouchableOpacity
       className={`px-4 py-2.5 rounded-full border mr-2 ${
         selectedFilter === filter
-          ? "bg-blue-500 border-blue-500 shadow-sm"
-          : "bg-gray-50 border-gray-200"
+          ? "bg-primary border-primary shadow-sm"
+          : "bg-secondary border-border"
       }`}
       onPress={() => setSelectedFilter(filter)}
       activeOpacity={0.7}
     >
       <Text
         className={`text-sm font-medium ${
-          selectedFilter === filter ? "text-white" : "text-gray-700"
+          selectedFilter === filter
+            ? "text-primary-foreground"
+            : "text-foreground"
         }`}
       >
         {label} ({count})
@@ -449,34 +484,34 @@ export default function TasksTab() {
 
   if (authLoading || loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-6">
-        <Text className="text-lg text-gray-900">Loading tasks...</Text>
+      <View className="flex-1 items-center justify-center bg-background p-6">
+        <Text className="text-lg text-foreground">Loading tasks...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-6">
-        <Text className="text-base text-red-500 mb-4">{error}</Text>
+      <View className="flex-1 items-center justify-center bg-background p-6">
+        <Text className="text-base text-destructive mb-4">{error}</Text>
         <Button onPress={fetchTasks}>
-          <Text className="text-white">Retry</Text>
+          <Text className="text-primary-foreground">Retry</Text>
         </Button>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="flex-row justify-between items-center px-5 pt-6 pb-3 bg-white">
-        <Text className="text-2xl font-bold text-gray-900">Tasks</Text>
-        <Text className="text-sm text-gray-500">
+    <View className="flex-1 bg-background">
+      <View className="flex-row justify-between items-center px-5 pt-6 pb-3 bg-background">
+        <Text className="text-2xl font-bold text-foreground">Tasks</Text>
+        <Text className="text-sm text-muted-foreground">
           {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
         </Text>
       </View>
 
       {/* Filter Chips */}
-      <View className="bg-white border-b border-gray-200">
+      <View className="bg-background border-b border-border">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -517,7 +552,7 @@ export default function TasksTab() {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         renderHiddenItem={renderHiddenItem}
-        rightOpenValue={-90}
+        rightOpenValue={-128}
         disableRightSwipe={true}
         leftOpenValue={90}
         refreshControl={
@@ -525,17 +560,25 @@ export default function TasksTab() {
         }
         contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 0 }}
         ListEmptyComponent={
-          <View className="flex-1 items-center justify-center bg-white p-6">
-            <Text className="text-lg text-gray-500 mb-2 text-center">
+          <View className="flex-1 items-center justify-center bg-background p-6">
+            <Text className="text-lg text-muted-foreground mb-2 text-center">
               No tasks found
             </Text>
-            <Text className="text-sm text-gray-400 text-center">
+            <Text className="text-sm text-muted-foreground text-center">
               {selectedFilter === "all"
                 ? "Create your first task to get started"
                 : `No tasks for ${selectedFilter.replace("-", " ")}`}
             </Text>
           </View>
         }
+      />
+
+      {/* Edit Task Dialog */}
+      <EditTaskDialog
+        visible={editDialogVisible}
+        onClose={handleEditDialogClose}
+        task={selectedTask}
+        onTaskUpdated={handleTaskUpdated}
       />
     </View>
   );
