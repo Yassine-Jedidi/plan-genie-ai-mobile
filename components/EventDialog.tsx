@@ -3,7 +3,10 @@ import { Calendar, Clock, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -108,122 +111,130 @@ export function EventDialog({
       transparent={true}
       onRequestClose={handleClose}
     >
-      <TouchableOpacity
-        className="flex-1 justify-end bg-black/50"
-        activeOpacity={1}
-        onPress={handleClose}
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <TouchableOpacity
+          className="flex-1 justify-end bg-black/50"
           activeOpacity={1}
-          onPress={(e) => e.stopPropagation()}
-          className="bg-background rounded-t-3xl p-6 max-h-[80%]"
+          onPress={handleClose}
         >
-          {/* Header */}
-          <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-semibold text-foreground">
-              {event ? "Edit Event" : "Add Event"}
-            </Text>
-            <TouchableOpacity onPress={handleClose} className="p-2">
-              <X size={24} className="text-foreground" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            className="bg-background rounded-t-3xl p-6 max-h-[80%]"
+          >
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Header */}
+              <View className="flex-row items-center justify-between mb-6">
+                <Text className="text-xl font-semibold text-foreground">
+                  {event ? "Edit Event" : "Add Event"}
+                </Text>
+                <TouchableOpacity onPress={handleClose} className="p-2">
+                  <X size={24} className="text-foreground" />
+                </TouchableOpacity>
+              </View>
 
-          {/* Title Input */}
-          <View className="mb-6">
-            <Text className="text-sm font-medium text-foreground mb-2">
-              Event Title
-            </Text>
-            <TextInput
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Enter event title"
-              className="bg-muted rounded-lg p-3 text-foreground border border-border"
-              placeholderTextColor="#6B7280"
-            />
-          </View>
+              {/* Title Input */}
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-foreground mb-2">
+                  Event Title
+                </Text>
+                <TextInput
+                  value={title}
+                  onChangeText={setTitle}
+                  placeholder="Enter event title"
+                  className="bg-muted rounded-lg p-3 text-foreground border border-border"
+                  placeholderTextColor="#6B7280"
+                />
+              </View>
 
-          {/* Date Selection */}
-          <View className="mb-6">
-            <Text className="text-sm font-medium text-foreground mb-2">
-              Date
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowDatePicker(true)}
-              className="flex-row items-center bg-muted rounded-lg p-3 border border-border"
-            >
-              <Calendar
-                size={20}
-                className="text-muted-foreground mr-3"
-                color={isDarkColorScheme ? "#fff" : "#000"}
+              {/* Date Selection */}
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-foreground mb-2">
+                  Date
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowDatePicker(true)}
+                  className="flex-row items-center bg-muted rounded-lg p-3 border border-border"
+                >
+                  <Calendar
+                    size={20}
+                    className="text-muted-foreground mr-3"
+                    color={isDarkColorScheme ? "#fff" : "#000"}
+                  />
+                  <Text className="text-foreground flex-1 ml-3">
+                    {formatDate(dateTime)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Time Selection */}
+              <View className="mb-8">
+                <Text className="text-sm font-medium text-foreground mb-2">
+                  Time
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowTimePicker(true)}
+                  className="flex-row items-center bg-muted rounded-lg p-3 border border-border"
+                >
+                  <Clock
+                    size={20}
+                    className="text-muted-foreground mr-3"
+                    color={isDarkColorScheme ? "#fff" : "#000"}
+                  />
+                  <Text className="text-foreground flex-1 ml-3">
+                    {formatTime(dateTime)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Action Buttons */}
+              <View className="flex-row space-x-3">
+                <TouchableOpacity
+                  onPress={handleClose}
+                  className="flex-1 bg-muted rounded-lg p-3"
+                >
+                  <Text className="text-center font-medium text-foreground">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleSave}
+                  className="flex-1 bg-primary rounded-lg p-3"
+                >
+                  <Text className="text-center font-medium text-primary-foreground">
+                    {event ? "Update" : "Create"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+
+            {/* Date Picker */}
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateTime}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
               />
-              <Text className="text-foreground flex-1 ml-3">
-                {formatDate(dateTime)}
-              </Text>
-            </TouchableOpacity>
-          </View>
+            )}
 
-          {/* Time Selection */}
-          <View className="mb-8">
-            <Text className="text-sm font-medium text-foreground mb-2">
-              Time
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowTimePicker(true)}
-              className="flex-row items-center bg-muted rounded-lg p-3 border border-border"
-            >
-              <Clock
-                size={20}
-                className="text-muted-foreground mr-3"
-                color={isDarkColorScheme ? "#fff" : "#000"}
+            {/* Time Picker */}
+            {showTimePicker && (
+              <DateTimePicker
+                value={dateTime}
+                mode="time"
+                display="default"
+                onChange={handleTimeChange}
               />
-              <Text className="text-foreground flex-1 ml-3">
-                {formatTime(dateTime)}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Action Buttons */}
-          <View className="flex-row space-x-3">
-            <TouchableOpacity
-              onPress={handleClose}
-              className="flex-1 bg-muted rounded-lg p-3"
-            >
-              <Text className="text-center font-medium text-foreground">
-                Cancel
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleSave}
-              className="flex-1 bg-primary rounded-lg p-3"
-            >
-              <Text className="text-center font-medium text-primary-foreground">
-                {event ? "Update" : "Create"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Date Picker */}
-          {showDatePicker && (
-            <DateTimePicker
-              value={dateTime}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
-
-          {/* Time Picker */}
-          {showTimePicker && (
-            <DateTimePicker
-              value={dateTime}
-              mode="time"
-              display="default"
-              onChange={handleTimeChange}
-            />
-          )}
+            )}
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
