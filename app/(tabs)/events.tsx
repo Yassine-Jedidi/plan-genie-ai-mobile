@@ -3,6 +3,7 @@ import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 import { Calendar } from "~/components/Calendar";
 import { EventDialog } from "~/components/EventDialog";
 import { EventList } from "~/components/EventList";
+import { Spinner } from "~/components/ui/spinner";
 import { useAuth } from "~/contexts/AuthContext";
 import { Event, eventsService } from "~/services/eventsService";
 
@@ -117,6 +118,7 @@ export default function EventsTab() {
   if (loading && !refreshing) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
+        <Spinner size="lg" className="mb-4" />
         <Text className="text-lg text-muted-foreground">Loading events...</Text>
       </View>
     );

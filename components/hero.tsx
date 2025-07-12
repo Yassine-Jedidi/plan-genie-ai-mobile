@@ -215,7 +215,7 @@ export function Hero() {
                 </Text>
                 <ArrowRight
                   size={20}
-                  color={isDarkColorScheme ? "#ffffff" : "#ffffff"}
+                  color={isDarkColorScheme ? "#000" : "#fff"}
                 />
               </View>
             </Button>

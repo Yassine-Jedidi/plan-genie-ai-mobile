@@ -20,6 +20,7 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import { EditTaskDialog } from "../../components/EditTaskDialog";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
+import { Spinner } from "../../components/ui/spinner";
 import { useAuth } from "../../contexts/AuthContext";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { tasksAPI } from "../../services/api";
@@ -485,7 +486,8 @@ export default function TasksTab() {
   if (authLoading || loading) {
     return (
       <View className="flex-1 items-center justify-center bg-background p-6">
-        <Text className="text-lg text-foreground">Loading tasks...</Text>
+        <Spinner size="lg" className="mb-4" />
+        <Text className="text-lg text-muted-foreground">Loading tasks...</Text>
       </View>
     );
   }
