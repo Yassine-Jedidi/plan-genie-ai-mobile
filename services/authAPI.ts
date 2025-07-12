@@ -13,6 +13,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   
   const defaultOptions: RequestInit = {
     ...options,
+    credentials: 'include', // Include cookies in requests
     headers: {
       ...getMobileHeaders(),
       ...options.headers,

@@ -13,6 +13,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   
   const defaultOptions: RequestInit = {
     ...options,
+    credentials: 'include', // Include cookies in requests
     headers: {
       ...getMobileHeaders(),
       ...options.headers,
@@ -44,6 +45,7 @@ const fileUploadRequest = async (endpoint: string, file: any, options: RequestIn
   const defaultOptions: RequestInit = {
     ...options,
     method: 'POST',
+    credentials: 'include', // Include cookies in requests
     headers: {
       'User-Agent': 'Plan-Genie-Mobile-App/1.0 (Expo)',
       ...options.headers,
@@ -112,6 +114,28 @@ export const eventsAPI = {
     return apiRequest('/events/save', {
       method: 'POST',
       body: JSON.stringify({ type, entities }),
+    });
+  },
+  getEvents: async (userId: string) => {
+    return apiRequest(`/events/${userId}`, {
+      method: 'GET',
+    });
+  },
+  saveManualEvent: async (title: string, date_time: string) => {
+    return apiRequest('/events/manual', {
+      method: 'POST',
+      body: JSON.stringify({ title, date_time }),
+    });
+  },
+  updateEvent: async (eventId: string, title: string, date_time: string) => {
+    return apiRequest(`/events/${eventId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ title, date_time }),
+    });
+  },
+  deleteEvent: async (eventId: string) => {
+    return apiRequest(`/events/${eventId}`, {
+      method: 'DELETE',
     });
   },
 }; 
