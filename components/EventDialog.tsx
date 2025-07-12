@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useColorScheme } from "~/hooks/useColorScheme";
 import { Event } from "~/services/eventsService";
 
 interface EventDialogProps {
@@ -30,6 +31,7 @@ export function EventDialog({
   const [dateTime, setDateTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const { isDarkColorScheme } = useColorScheme();
 
   useEffect(() => {
     if (event) {
@@ -106,8 +108,16 @@ export function EventDialog({
       transparent={true}
       onRequestClose={handleClose}
     >
-      <View className="flex-1 justify-end bg-black/50">
-        <View className="bg-background rounded-t-3xl p-6 max-h-[80%]">
+      <TouchableOpacity
+        className="flex-1 justify-end bg-black/50"
+        activeOpacity={1}
+        onPress={handleClose}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={(e) => e.stopPropagation()}
+          className="bg-background rounded-t-3xl p-6 max-h-[80%]"
+        >
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
             <Text className="text-xl font-semibold text-foreground">
@@ -141,8 +151,12 @@ export function EventDialog({
               onPress={() => setShowDatePicker(true)}
               className="flex-row items-center bg-muted rounded-lg p-3 border border-border"
             >
-              <Calendar size={20} className="text-muted-foreground mr-3" />
-              <Text className="text-foreground flex-1">
+              <Calendar
+                size={20}
+                className="text-muted-foreground mr-3"
+                color={isDarkColorScheme ? "#fff" : "#000"}
+              />
+              <Text className="text-foreground flex-1 ml-3">
                 {formatDate(dateTime)}
               </Text>
             </TouchableOpacity>
@@ -157,8 +171,12 @@ export function EventDialog({
               onPress={() => setShowTimePicker(true)}
               className="flex-row items-center bg-muted rounded-lg p-3 border border-border"
             >
-              <Clock size={20} className="text-muted-foreground mr-3" />
-              <Text className="text-foreground flex-1">
+              <Clock
+                size={20}
+                className="text-muted-foreground mr-3"
+                color={isDarkColorScheme ? "#fff" : "#000"}
+              />
+              <Text className="text-foreground flex-1 ml-3">
                 {formatTime(dateTime)}
               </Text>
             </TouchableOpacity>
@@ -204,8 +222,8 @@ export function EventDialog({
               onChange={handleTimeChange}
             />
           )}
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 }

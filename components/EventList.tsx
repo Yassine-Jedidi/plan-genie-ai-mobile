@@ -40,12 +40,20 @@ export function EventList({
   };
 
   const getEventsForDate = (date: Date) => {
-    const dateKey = date.toISOString().split("T")[0];
+    // Use local date comparison to avoid timezone issues
+    const selectedYear = date.getFullYear();
+    const selectedMonth = date.getMonth();
+    const selectedDay = date.getDate();
+
     return events
       .filter((event) => {
         if (!event.date_time) return false;
         const eventDate = new Date(event.date_time);
-        return eventDate.toISOString().split("T")[0] === dateKey;
+        return (
+          eventDate.getFullYear() === selectedYear &&
+          eventDate.getMonth() === selectedMonth &&
+          eventDate.getDate() === selectedDay
+        );
       })
       .sort((a, b) => {
         if (!a.date_time || !b.date_time) return 0;

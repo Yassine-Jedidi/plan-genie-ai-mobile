@@ -11,7 +11,9 @@ export default function EventsTab() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  ); // Default to today
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [dialogSelectedDate, setDialogSelectedDate] = useState<
@@ -152,13 +154,14 @@ export default function EventsTab() {
           {selectedDate && (
             <View className="bg-muted rounded-lg p-4">
               <Text className="text-lg font-semibold text-foreground">
-                Events for{" "}
-                {selectedDate.toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {selectedDate.toDateString() === new Date().toDateString()
+                  ? "Today's Events"
+                  : `Events for ${selectedDate.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}`}
               </Text>
             </View>
           )}

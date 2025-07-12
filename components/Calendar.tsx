@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useColorScheme } from "~/hooks/useColorScheme";
 import { Event } from "~/services/eventsService";
 
 interface CalendarProps {
@@ -17,6 +18,7 @@ export function Calendar({
   selectedDate,
 }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const { isDarkColorScheme } = useColorScheme();
 
   // Generate calendar data for current month
   const calendarData = useMemo(() => {
@@ -44,7 +46,11 @@ export function Calendar({
     const grouped: Record<string, Event[]> = {};
     events.forEach((event) => {
       if (event.date_time) {
-        const dateKey = new Date(event.date_time).toISOString().split("T")[0];
+        const eventDate = new Date(event.date_time);
+        // Use local date string to avoid timezone issues
+        const dateKey = `${eventDate.getFullYear()}-${String(
+          eventDate.getMonth() + 1
+        ).padStart(2, "0")}-${String(eventDate.getDate()).padStart(2, "0")}`;
         if (!grouped[dateKey]) {
           grouped[dateKey] = [];
         }
@@ -68,7 +74,10 @@ export function Calendar({
   };
 
   const hasEvents = (date: Date) => {
-    const dateKey = date.toISOString().split("T")[0];
+    // Use local date string to avoid timezone issues
+    const dateKey = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     return eventsByDate[dateKey] && eventsByDate[dateKey].length > 0;
   };
 
@@ -107,7 +116,10 @@ export function Calendar({
           onPress={() => navigateMonth("prev")}
           className="p-2 rounded-full bg-muted"
         >
-          <ChevronLeft size={20} className="text-foreground" />
+          <ChevronLeft
+            size={20}
+            color={isDarkColorScheme ? "#ffffff" : "#000000"}
+          />
         </TouchableOpacity>
 
         <Text className="text-lg font-semibold text-foreground">
@@ -118,7 +130,10 @@ export function Calendar({
           onPress={() => navigateMonth("next")}
           className="p-2 rounded-full bg-muted"
         >
-          <ChevronRight size={20} className="text-foreground" />
+          <ChevronRight
+            size={20}
+            color={isDarkColorScheme ? "#ffffff" : "#000000"}
+          />
         </TouchableOpacity>
       </View>
 
@@ -143,7 +158,7 @@ export function Calendar({
             <TouchableOpacity
               key={index}
               onPress={() => onDatePress(date)}
-              className={`w-[14.28%] aspect-square items-center justify-center border border-border ${
+              className={`w-[14.28%] h-12 items-center justify-center border border-border m-0.5 ${
                 isToday(date) ? "bg-primary" : ""
               } ${isSelected(date) ? "bg-accent" : ""} ${
                 !isCurrentMonth(date) ? "opacity-30" : ""
@@ -173,7 +188,7 @@ export function Calendar({
         onPress={onAddEvent}
         className="flex-row items-center justify-center mt-4 p-3 bg-primary rounded-lg"
       >
-        <Plus size={20} className="text-foreground mr-2" />
+        <Plus size={20} color={isDarkColorScheme ? "#000" : "#fff"} />
         <Text className="text-primary-foreground font-medium">Add Event</Text>
       </TouchableOpacity>
     </View>
