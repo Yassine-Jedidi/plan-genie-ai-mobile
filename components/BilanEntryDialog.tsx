@@ -1,8 +1,17 @@
-import { Clock, Save, Trash2, X } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import {
+  AlertCircle,
+  Calendar,
+  Clock,
+  Save,
+  Trash2,
+  X,
+} from "lucide-react-native";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -10,6 +19,7 @@ import {
   View,
 } from "react-native";
 import { useColorScheme } from "../hooks/useColorScheme";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 
 interface Task {
@@ -17,6 +27,7 @@ interface Task {
   title: string;
   priority: string | null;
   status: string | null;
+  deadline: string | null;
 }
 
 interface BilanEntry {
@@ -54,6 +65,20 @@ export function BilanEntryDialog({
   const [minutesSpent, setMinutesSpent] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [loading, setLoading] = useState(false);
+
+  // Filter out overdue and completed tasks
+  const availableTasks = useMemo(() => {
+    const now = new Date();
+    return tasks.filter((task) => {
+      // Exclude completed tasks
+      if (task.status === "Done") return false;
+
+      // Exclude overdue tasks
+      if (task.deadline && new Date(task.deadline) < now) return false;
+
+      return true;
+    });
+  }, [tasks]);
 
   useEffect(() => {
     if (entry && isEditing) {
@@ -114,17 +139,49 @@ export function BilanEntryDialog({
   };
 
   const getPriorityColor = (priority: string | null) => {
-    switch (priority) {
-      case "High":
-        return "text-red-500";
-      case "Medium":
-        return "text-yellow-500";
-      case "Low":
-        return "text-green-500";
+    switch (priority?.toLowerCase()) {
+      case "high":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "medium":
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
+      case "low":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
-        return "text-gray-500";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
     }
   };
+
+  const getPriorityLabel = (priority: string | null) => {
+    switch (priority?.toLowerCase()) {
+      case "high":
+        return "High";
+      case "medium":
+        return "Medium";
+      case "low":
+        return "Low";
+      default:
+        return "Medium";
+    }
+  };
+
+  const formatDeadline = (deadline: string | null) => {
+    if (!deadline) return null;
+    try {
+      const date = new Date(deadline);
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  const selectedTask = availableTasks.find(
+    (task) => task.id === selectedTaskId
+  );
 
   return (
     <Modal
@@ -133,170 +190,269 @@ export function BilanEntryDialog({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View
-        className={`flex-1 ${isDarkColorScheme ? "bg-gray-900" : "bg-white"}`}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        {/* Header */}
-        <View
-          className={`flex-row items-center justify-between p-4 border-b ${
-            isDarkColorScheme ? "border-gray-700" : "border-gray-200"
-          }`}
-        >
-          <Text
-            className={`text-lg font-semibold ${
-              isDarkColorScheme ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {isEditing ? "Edit Time Entry" : "Add Time Entry"}
-          </Text>
-          <TouchableOpacity onPress={onClose}>
-            <X size={24} color={isDarkColorScheme ? "#ffffff" : "#000000"} />
-          </TouchableOpacity>
-        </View>
+        <View className="flex-1 bg-background">
+          {/* Header */}
+          <View className="flex-row items-center justify-between p-6 border-b border-border">
+            <View>
+              <Text className="text-xl font-bold text-foreground">
+                {isEditing ? "Edit Time Entry" : "Add Time Entry"}
+              </Text>
+              <Text className="text-sm mt-1 text-muted-foreground">
+                Track your time spent on tasks
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={onClose}
+              className="w-10 h-10 rounded-full items-center justify-center bg-muted"
+            >
+              <X size={20} color={isDarkColorScheme ? "#ffffff" : "#000000"} />
+            </TouchableOpacity>
+          </View>
 
-        <ScrollView className="flex-1 p-4">
-          {/* Task Selection */}
-          <View className="mb-6">
-            <Text
-              className={`text-sm font-medium mb-2 ${
-                isDarkColorScheme ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Task *
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="mb-2"
-            >
-              {tasks.map((task) => (
-                <TouchableOpacity
-                  key={task.id}
-                  onPress={() => setSelectedTaskId(task.id)}
-                  className={`mr-2 px-3 py-2 rounded-lg border ${
-                    selectedTaskId === task.id
-                      ? "bg-blue-500 border-blue-500"
-                      : isDarkColorScheme
-                      ? "border-gray-600 bg-gray-800"
-                      : "border-gray-300 bg-gray-50"
-                  }`}
-                >
-                  <Text
-                    className={`text-sm ${
-                      selectedTaskId === task.id
-                        ? "text-white"
-                        : isDarkColorScheme
-                        ? "text-white"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    {task.title}
+          <ScrollView
+            className="flex-1 p-6"
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Task Selection */}
+            <View className="mb-8">
+              <View className="flex-row items-center mb-4">
+                <View className="w-8 h-8 rounded-full items-center justify-center mr-3 bg-primary/10">
+                  <Calendar
+                    size={16}
+                    color={isDarkColorScheme ? "#ffffff" : "#000000"}
+                  />
+                </View>
+                <View>
+                  <Text className="text-lg font-semibold text-foreground">
+                    Select Task
                   </Text>
-                  {task.priority && (
-                    <Text
-                      className={`text-xs ${getPriorityColor(task.priority)}`}
-                    >
-                      {task.priority}
+                  <Text className="text-sm text-muted-foreground">
+                    Choose a task to track time for
+                  </Text>
+                </View>
+              </View>
+
+              {availableTasks.length === 0 ? (
+                <View className="p-6 rounded-xl border-2 border-dashed border-border bg-card">
+                  <View className="items-center">
+                    <AlertCircle
+                      size={48}
+                      color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
+                    />
+                    <Text className="text-lg font-medium mt-3 text-foreground">
+                      No Available Tasks
                     </Text>
+                    <Text className="text-sm text-center mt-2 text-muted-foreground">
+                      All your tasks are either completed or overdue. Create new
+                      tasks to start tracking time.
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View className="space-y-3">
+                  {availableTasks.map((task) => (
+                    <TouchableOpacity
+                      key={task.id}
+                      onPress={() => setSelectedTaskId(task.id)}
+                      className={`p-4 rounded-xl border-2 ${
+                        selectedTaskId === task.id
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-card"
+                      }`}
+                    >
+                      <View className="flex-row items-start justify-between">
+                        <View className="flex-1">
+                          <Text
+                            className={`text-base font-semibold mb-2 ${
+                              selectedTaskId === task.id
+                                ? "text-primary"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {task.title}
+                          </Text>
+                          <View className="flex-row items-center gap-x-2">
+                            <Badge className={getPriorityColor(task.priority)}>
+                              {getPriorityLabel(task.priority)}
+                            </Badge>
+                            {task.deadline && (
+                              <View className="flex-row items-center">
+                                <Clock
+                                  size={12}
+                                  color={
+                                    isDarkColorScheme ? "#9ca3af" : "#6b7280"
+                                  }
+                                />
+                                <Text className="text-xs ml-1 text-muted-foreground">
+                                  {formatDeadline(task.deadline)}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        </View>
+                        {selectedTaskId === task.id && (
+                          <View className="w-6 h-6 rounded-full items-center justify-center bg-primary">
+                            <Text className="text-primary-foreground text-sm font-bold">
+                              ✓
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Time Input */}
+            <View className="mb-8">
+              <View className="flex-row items-center mb-4">
+                <View className="w-8 h-8 rounded-full items-center justify-center mr-3 bg-green-100 dark:bg-green-900">
+                  <Clock
+                    size={16}
+                    color={isDarkColorScheme ? "#4ade80" : "#22c55e"}
+                  />
+                </View>
+                <View>
+                  <Text className="text-lg font-semibold text-foreground">
+                    Time Spent
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    How long did you work on this task?
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex-row items-center border-2 rounded-xl px-4 py-3 border-border bg-card">
+                <TextInput
+                  value={minutesSpent}
+                  onChangeText={setMinutesSpent}
+                  placeholder="Enter minutes (e.g., 30)"
+                  placeholderTextColor={
+                    isDarkColorScheme ? "#9ca3af" : "#6b7280"
+                  }
+                  keyboardType="numeric"
+                  className="flex-1 text-base text-foreground"
+                />
+                <Text className="text-sm font-medium text-muted-foreground">
+                  minutes
+                </Text>
+              </View>
+
+              {minutesSpent && !isNaN(parseInt(minutesSpent)) && (
+                <View className="mt-3 p-3 rounded-lg bg-primary/10">
+                  <Text className="text-sm text-primary">
+                    {parseInt(minutesSpent) >= 60
+                      ? `${Math.floor(parseInt(minutesSpent) / 60)}h ${
+                          parseInt(minutesSpent) % 60
+                        }m`
+                      : `${parseInt(minutesSpent)} minutes`}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Notes */}
+            <View className="mb-8">
+              <View className="flex-row items-center mb-4">
+                <View className="w-8 h-8 rounded-full items-center justify-center mr-3 bg-purple-100 dark:bg-purple-900">
+                  <Text className="text-lg">📝</Text>
+                </View>
+                <View>
+                  <Text className="text-lg font-semibold text-foreground">
+                    Notes (Optional)
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    Add details about what you worked on
+                  </Text>
+                </View>
+              </View>
+
+              <View className="border-2 rounded-xl px-4 py-3 border-border bg-card">
+                <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  placeholder="What did you accomplish? Any challenges or insights?"
+                  placeholderTextColor={
+                    isDarkColorScheme ? "#9ca3af" : "#6b7280"
+                  }
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  className="text-base text-foreground"
+                />
+              </View>
+            </View>
+
+            {/* Selected Task Summary */}
+            {selectedTask && (
+              <View className="mb-6 p-4 rounded-xl bg-card border border-border">
+                <Text className="text-sm font-medium mb-2 text-muted-foreground">
+                  Selected Task Summary
+                </Text>
+                <Text className="text-base font-semibold mb-2 text-foreground">
+                  {selectedTask.title}
+                </Text>
+                <View className="flex-row items-center space-x-2">
+                  <Badge className={getPriorityColor(selectedTask.priority)}>
+                    {getPriorityLabel(selectedTask.priority)} Priority
+                  </Badge>
+                  {selectedTask.deadline && (
+                    <View className="flex-row items-center">
+                      <Clock
+                        size={12}
+                        color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
+                      />
+                      <Text className="text-xs ml-1 text-muted-foreground">
+                        Due: {formatDeadline(selectedTask.deadline)}
+                      </Text>
+                    </View>
                   )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+                </View>
+              </View>
+            )}
+          </ScrollView>
 
-          {/* Time Spent */}
-          <View className="mb-6">
-            <Text
-              className={`text-sm font-medium mb-2 ${
-                isDarkColorScheme ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Time Spent (minutes) *
-            </Text>
-            <View
-              className={`flex-row items-center border rounded-lg px-3 py-2 ${
-                isDarkColorScheme
-                  ? "border-gray-600 bg-gray-800"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-            >
-              <Clock
-                size={20}
-                color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
-                className="mr-2"
-              />
-              <TextInput
-                value={minutesSpent}
-                onChangeText={setMinutesSpent}
-                placeholder="Enter minutes spent"
-                placeholderTextColor={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
-                keyboardType="numeric"
-                className={`flex-1 ${
-                  isDarkColorScheme ? "text-white" : "text-gray-900"
-                }`}
-              />
-            </View>
-          </View>
-
-          {/* Notes */}
-          <View className="mb-6">
-            <Text
-              className={`text-sm font-medium mb-2 ${
-                isDarkColorScheme ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Notes (optional)
-            </Text>
-            <View
-              className={`border rounded-lg px-3 py-2 ${
-                isDarkColorScheme
-                  ? "border-gray-600 bg-gray-800"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-            >
-              <TextInput
-                value={notes}
-                onChangeText={setNotes}
-                placeholder="Add notes about what you worked on..."
-                placeholderTextColor={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                className={`${
-                  isDarkColorScheme ? "text-white" : "text-gray-900"
-                }`}
-              />
-            </View>
-          </View>
-        </ScrollView>
-
-        {/* Footer */}
-        <View
-          className={`flex-row justify-between p-4 border-t ${
-            isDarkColorScheme ? "border-gray-700" : "border-gray-200"
-          }`}
-        >
-          {isEditing && onDelete && (
+          {/* Footer */}
+          <View className="flex-row justify-between p-6 border-t border-border">
+            {isEditing && onDelete && (
+              <Button
+                variant="destructive"
+                onPress={handleDelete}
+                disabled={loading}
+                className="flex-1 mr-3"
+              >
+                <View className="flex-row items-center justify-center">
+                  <Trash2 size={16} color="#ffffff" />
+                  <Text className="ml-2 text-white font-medium">Delete</Text>
+                </View>
+              </Button>
+            )}
             <Button
-              variant="destructive"
-              onPress={handleDelete}
-              disabled={loading}
-              className="flex-1 mr-2"
+              onPress={handleSave}
+              disabled={
+                loading ||
+                !selectedTaskId ||
+                !minutesSpent ||
+                availableTasks.length === 0
+              }
+              className={`${isEditing && onDelete ? "flex-1 ml-3" : "flex-1"}`}
             >
-              <Trash2 size={16} className="mr-2" />
-              Delete
+              <View className="flex-row items-center justify-center">
+                <Save size={16} color={isDarkColorScheme ? "#000" : "#fff"} />
+                <Text className="ml-2 font-medium text-primary-foreground">
+                  {loading ? "Saving..." : "Save Entry"}
+                </Text>
+              </View>
             </Button>
-          )}
-          <Button
-            onPress={handleSave}
-            disabled={loading || !selectedTaskId || !minutesSpent}
-            className={`${isEditing && onDelete ? "flex-1 ml-2" : "flex-1"}`}
-          >
-            <Save size={16} className="mr-2" />
-            {loading ? "Saving..." : "Save"}
-          </Button>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
