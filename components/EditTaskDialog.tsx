@@ -91,7 +91,6 @@ export function EditTaskDialog({
   };
 
   const handleDateChange = (event: any, date?: Date) => {
-    setShowDatePicker(false);
     if (date) {
       setSelectedDate(date);
       setDeadline(date.toISOString());
