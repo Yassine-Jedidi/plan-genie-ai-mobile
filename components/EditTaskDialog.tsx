@@ -154,11 +154,11 @@ export function EditTaskDialog({
       <ScrollView className="max-h-[500px]">
         {/* Title */}
         <View className="mb-5">
-          <Text className="text-sm font-medium text-primary-foreground mb-2">
+          <Text className="text-sm font-medium text-primary mb-2">
             Task Title
           </Text>
           <TextInput
-            className="border border-border rounded-lg px-4 py-3 text-foreground bg-background"
+            className="border border-border rounded-lg px-4 py-3 text-foreground bg-primary-foreground  "
             value={title}
             onChangeText={setTitle}
             placeholder="Enter task title"
@@ -254,7 +254,7 @@ export function EditTaskDialog({
         </View>
 
         {/* Action Buttons */}
-        <View className="flex-row space-x-3">
+        <View className="flex-row gap-x-4">
           <Button
             onPress={handleCancel}
             className="flex-1 bg-secondary"

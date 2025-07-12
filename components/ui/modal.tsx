@@ -29,7 +29,7 @@ export function ModalDialog({
         onPress={onClose}
       >
         <TouchableOpacity
-          className="bg-white rounded-xl w-full max-w-md shadow-xl"
+          className="bg-primary-foreground rounded-xl w-full max-w-md shadow-xl"
           activeOpacity={1}
           onPress={(e) => e.stopPropagation()}
         >
@@ -37,7 +37,7 @@ export function ModalDialog({
           {(title || showCloseButton) && (
             <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
               {title && (
-                <Text className="text-lg font-semibold text-gray-900">
+                <Text className="text-lg font-semibold text-primary">
                   {title}
                 </Text>
               )}
