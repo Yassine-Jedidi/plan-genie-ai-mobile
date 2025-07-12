@@ -49,6 +49,7 @@ interface BilanEntryDialogProps {
   tasks: Task[];
   entry?: BilanEntry | null;
   isEditing?: boolean;
+  currentEntries?: BilanEntry[];
 }
 
 export function BilanEntryDialog({
@@ -59,6 +60,7 @@ export function BilanEntryDialog({
   tasks,
   entry,
   isEditing = false,
+  currentEntries = [],
 }: BilanEntryDialogProps) {
   const { isDarkColorScheme } = useColorScheme();
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
@@ -69,6 +71,12 @@ export function BilanEntryDialog({
   // Filter out overdue and completed tasks
   const availableTasks = useMemo(() => {
     const now = new Date();
+
+    // Get task IDs that already have time entries
+    const existingTaskIds = new Set(
+      currentEntries.map((entry) => entry.task.id)
+    );
+
     return tasks.filter((task) => {
       // Exclude completed tasks
       if (task.status === "Done") return false;
@@ -76,9 +84,16 @@ export function BilanEntryDialog({
       // Exclude overdue tasks
       if (task.deadline && new Date(task.deadline) < now) return false;
 
+      // Exclude tasks that already have time entries (unless we're editing that entry)
+      if (
+        existingTaskIds.has(task.id) &&
+        (!isEditing || task.id !== entry?.task.id)
+      )
+        return false;
+
       return true;
     });
-  }, [tasks]);
+  }, [tasks, currentEntries, entry, isEditing]);
 
   useEffect(() => {
     if (entry && isEditing) {

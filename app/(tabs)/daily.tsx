@@ -31,6 +31,7 @@ interface Task {
   title: string;
   priority: string | null;
   status: string | null;
+  deadline: string | null;
 }
 
 interface BilanEntry {
@@ -198,13 +199,13 @@ export default function DailyTab() {
   };
 
   const getPriorityColor = (priority: string | null) => {
-    switch (priority) {
-      case "High":
-        return "bg-red-100 text-red-800";
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800";
-      case "Low":
-        return "bg-green-100 text-green-800";
+    switch (priority?.toLowerCase()) {
+      case "high":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "medium":
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
+      case "low":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -519,6 +520,7 @@ export default function DailyTab() {
         tasks={tasks}
         entry={editingEntry}
         isEditing={isEditing}
+        currentEntries={currentBilan?.entries || []}
       />
     </View>
   );
