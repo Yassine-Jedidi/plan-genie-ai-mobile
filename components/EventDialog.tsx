@@ -169,6 +169,18 @@ export function EventDialog({
                     {formatDate(dateTime)}
                   </Text>
                 </TouchableOpacity>
+
+                {/* Date Picker */}
+                {showDatePicker && (
+                  <View className="mt-2">
+                    <DateTimePicker
+                      value={dateTime}
+                      mode="date"
+                      display="default"
+                      onChange={handleDateChange}
+                    />
+                  </View>
+                )}
               </View>
 
               {/* Time Selection */}
@@ -189,6 +201,18 @@ export function EventDialog({
                     {formatTime(dateTime)}
                   </Text>
                 </TouchableOpacity>
+
+                {/* Time Picker */}
+                {showTimePicker && (
+                  <View className="mt-2">
+                    <DateTimePicker
+                      value={dateTime}
+                      mode="time"
+                      display="default"
+                      onChange={handleTimeChange}
+                    />
+                  </View>
+                )}
               </View>
 
               {/* Action Buttons */}
@@ -212,26 +236,6 @@ export function EventDialog({
                 </TouchableOpacity>
               </View>
             </ScrollView>
-
-            {/* Date Picker */}
-            {showDatePicker && (
-              <DateTimePicker
-                value={dateTime}
-                mode="date"
-                display="default"
-                onChange={handleDateChange}
-              />
-            )}
-
-            {/* Time Picker */}
-            {showTimePicker && (
-              <DateTimePicker
-                value={dateTime}
-                mode="time"
-                display="default"
-                onChange={handleTimeChange}
-              />
-            )}
           </TouchableOpacity>
         </TouchableOpacity>
       </KeyboardAvoidingView>
