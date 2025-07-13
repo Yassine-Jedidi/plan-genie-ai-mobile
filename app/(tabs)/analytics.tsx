@@ -124,7 +124,7 @@ export default function AnalyticsTab() {
       >
         {/* Header */}
         <View className="px-4 pt-4 pb-6">
-          <Text className="text-3xl font-bold text-foreground mb-2">
+          <Text className="text-2xl font-bold text-foreground mb-2">
             Analytics
           </Text>
           <Text className="text-muted-foreground">

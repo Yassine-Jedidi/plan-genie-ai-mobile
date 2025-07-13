@@ -26,6 +26,11 @@ export const BarChart: React.FC<BarChartProps> = ({
   const max = maxValue || Math.max(...data.map((d) => d.value), 1);
   const defaultColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
+  // Reserve space for value labels and chart labels
+  const valueLabelHeight = showValues ? 20 : 0;
+  const chartLabelHeight = 40;
+  const availableHeight = height - valueLabelHeight - chartLabelHeight;
+
   return (
     <View className="w-full">
       {title && (
@@ -38,7 +43,7 @@ export const BarChart: React.FC<BarChartProps> = ({
         className="flex-row items-end justify-between space-x-2"
       >
         {data.map((item, index) => {
-          const barHeight = (item.value / max) * height;
+          const barHeight = (item.value / max) * availableHeight;
           const color =
             item.color || defaultColors[index % defaultColors.length];
 
@@ -46,7 +51,10 @@ export const BarChart: React.FC<BarChartProps> = ({
             <View key={item.label} className="flex-1 items-center">
               <View className="w-full items-center">
                 {showValues && (
-                  <Text className="text-xs text-muted-foreground mb-1">
+                  <Text
+                    className="text-xs font-medium text-foreground mb-1"
+                    style={{ height: valueLabelHeight }}
+                  >
                     {item.value}
                   </Text>
                 )}
@@ -58,7 +66,15 @@ export const BarChart: React.FC<BarChartProps> = ({
                   }}
                   className="w-full rounded-t-sm"
                 />
-                <Text className="text-xs text-muted-foreground mt-2 text-center">
+                <Text
+                  className="text-xs text-muted-foreground mt-2 text-center"
+                  style={{
+                    height: chartLabelHeight,
+                    lineHeight: 12,
+                    flexWrap: "wrap",
+                  }}
+                  numberOfLines={2}
+                >
                   {item.label}
                 </Text>
               </View>
