@@ -41,7 +41,7 @@ export default function TabsLayout() {
               iconName = "calendar";
               break;
             case "daily":
-              iconName = "sunny-outline";
+              iconName = "time-outline";
               break;
             case "analytics":
               iconName = "bar-chart-outline";
