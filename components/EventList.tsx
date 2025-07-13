@@ -6,6 +6,7 @@ import {
 } from "lucide-react-native";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useColorScheme } from "~/hooks/useColorScheme";
 import { Event } from "~/services/eventsService";
 
 interface EventListProps {
@@ -21,6 +22,8 @@ export function EventList({
   onEditEvent,
   onDeleteEvent,
 }: EventListProps) {
+  const { isDarkColorScheme } = useColorScheme();
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString("en-US", {
@@ -122,7 +125,11 @@ export function EventList({
                   onPress={() => onEditEvent(event)}
                   className="p-2 rounded-full bg-muted"
                 >
-                  <Edit size={16} className="text-foreground" />
+                  <Edit
+                    size={16}
+                    className="text-foreground"
+                    color={isDarkColorScheme ? "white" : "black"}
+                  />
                 </TouchableOpacity>
 
                 <TouchableOpacity

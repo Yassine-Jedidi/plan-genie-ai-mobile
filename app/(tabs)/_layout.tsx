@@ -25,6 +25,9 @@ export default function TabsLayout() {
       screenOptions={({ route }) => ({
         headerShown: true,
         headerTitle: "",
+        headerStyle: {
+          height: 100, // Increased from default height
+        },
         tabBarIcon: ({ color, size }) => {
           let iconName;
           switch (route.name) {
@@ -52,7 +55,7 @@ export default function TabsLayout() {
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
         headerLeft: () => (
-          <View className="flex-row items-center">
+          <View className="flex-row items-center ml-2">
             {user?.avatar_url && (
               <Image
                 source={{ uri: user?.avatar_url }}
