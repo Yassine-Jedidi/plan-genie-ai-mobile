@@ -1,39 +1,4 @@
-// API Configuration
-const API_BASE_URL = 'https://plan-genie-ai-backend.vercel.app';
-
-// Custom headers for mobile requests
-const getMobileHeaders = () => ({
-  'Content-Type': 'application/json',
-  'User-Agent': 'Plan-Genie-Mobile-App/1.0 (Expo)',
-});
-
-// Generic API request function
-const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const defaultOptions: RequestInit = {
-    ...options,
-    credentials: 'include', // Include cookies in requests
-    headers: {
-      ...getMobileHeaders(),
-      ...options.headers,
-    },
-  };
-
-  try {
-    const response = await fetch(url, defaultOptions);
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP error! status: ${response.status}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('API Request Error:', error);
-    throw error;
-  }
-};
+import { apiRequest } from './config';
 
 // Authentication API Service
 export const authAPI = {
@@ -41,12 +6,12 @@ export const authAPI = {
   signUp: async (email: string, password: string) => {
     return apiRequest('/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({
+      data: {
         email,
         password,
         clientType: 'expo', // This identifies the request as coming from mobile
         // No turnstileToken needed for mobile
-      }),
+      },
     });
   },
 
@@ -54,12 +19,12 @@ export const authAPI = {
   signIn: async (email: string, password: string) => {
     return apiRequest('/auth/signin', {
       method: 'POST',
-      body: JSON.stringify({
+      data: {
         email,
         password,
         clientType: 'expo', // This identifies the request as coming from mobile
         // No turnstileToken needed for mobile
-      }),
+      },
     });
   },
 
@@ -74,11 +39,11 @@ export const authAPI = {
   resetPassword: async (email: string) => {
     return apiRequest('/auth/reset-password', {
       method: 'POST',
-      body: JSON.stringify({
+      data: {
         email,
         clientType: 'expo', // This identifies the request as coming from mobile
         // No turnstileToken needed for mobile
-      }),
+      },
     });
   },
 
@@ -86,11 +51,11 @@ export const authAPI = {
   updatePassword: async (password: string, accessToken: string, refreshToken: string) => {
     return apiRequest('/auth/update-password', {
       method: 'POST',
-      body: JSON.stringify({
+      data: {
         password,
         accessToken,
         refreshToken,
-      }),
+      },
     });
   },
 
@@ -105,7 +70,7 @@ export const authAPI = {
   updateProfile: async (data: any) => {
     return apiRequest('/auth/profile', {
       method: 'PUT',
-      body: JSON.stringify({ data }),
+      data: { data },
     });
   },
 
@@ -113,7 +78,7 @@ export const authAPI = {
   updateTheme: async (theme: string, colorTheme: string) => {
     return apiRequest('/auth/theme', {
       method: 'PUT',
-      body: JSON.stringify({ theme, colorTheme }),
+      data: { theme, colorTheme },
     });
   },
 };
