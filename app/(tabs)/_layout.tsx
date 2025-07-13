@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, router } from "expo-router";
 import * as React from "react";
-import { View } from "react-native";
+import { Image, View } from "react-native";
 import { ThemeToggle } from "~/components/themeToggle";
 import { Button } from "~/components/ui/button";
+import { Text } from "~/components/ui/text";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function TabsLayout() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -50,6 +51,22 @@ export default function TabsLayout() {
           }
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
+        headerLeft: () => (
+          <View className="flex-row items-center">
+            {user?.avatar_url && (
+              <Image
+                source={{ uri: user?.avatar_url }}
+                className="w-8 h-8 rounded-full"
+                alt="User avatar"
+              />
+            )}
+            {user?.full_name && (
+              <Text className="text-sm text-foreground ml-3 font-medium">
+                {user.full_name}
+              </Text>
+            )}
+          </View>
+        ),
         headerRight: () => (
           <View className="flex-row items-center">
             <ThemeToggle />
