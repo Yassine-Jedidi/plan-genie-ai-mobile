@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import {
   BarChart3,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -158,6 +159,50 @@ export default function DailyTab() {
     }
   };
 
+  const handleMarkTaskAsDone = async (task: Task) => {
+    if (task.status === "Done") {
+      Alert.alert(
+        "Task Already Completed",
+        "This task is already marked as done."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Mark Task as Done",
+      `Do you want to mark "${task.title}" as completed?\n\nThis will update the task status to "Done" and record the completion time.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Mark as Done",
+          style: "default",
+          onPress: async () => {
+            try {
+              await tasksAPI.updateTask(task.id, {
+                title: task.title,
+                deadline: task.deadline,
+                priority: task.priority,
+                status: "Done",
+                completed_at: new Date().toISOString(),
+              });
+
+              // Refresh data to show updated task status
+              await fetchData();
+
+              Alert.alert("Success", "Task marked as completed!");
+            } catch (error) {
+              console.error("Error updating task:", error);
+              Alert.alert(
+                "Error",
+                "Failed to mark task as completed. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const navigateDate = (direction: "prev" | "next") => {
     const newDate = new Date(selectedDate);
     if (direction === "prev") {
@@ -207,7 +252,19 @@ export default function DailyTab() {
       case "low":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
+    }
+  };
+
+  const getStatusColor = (status: string | null) => {
+    switch (status) {
+      case "Done":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "In Progress":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      case "Planned":
+      default:
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
     }
   };
 
@@ -394,6 +451,15 @@ export default function DailyTab() {
                           {entry.task.priority}
                         </Badge>
                       )}
+                      {entry.task.status && (
+                        <Badge
+                          className={`ml-2 ${getStatusColor(
+                            entry.task.status
+                          )}`}
+                        >
+                          {entry.task.status}
+                        </Badge>
+                      )}
                     </View>
 
                     <View className="flex-row items-center mb-2">
@@ -444,11 +510,29 @@ export default function DailyTab() {
                         >
                           <Trash2 size={16} color="#ef4444" />
                         </TouchableOpacity>
+                        {entry.task.status !== "Done" && (
+                          <TouchableOpacity
+                            onPress={() => handleMarkTaskAsDone(entry.task)}
+                            className="p-2 ml-1 bg-green-100 dark:bg-green-900 rounded-full"
+                          >
+                            <CheckCircle size={16} color="#22c55e" />
+                          </TouchableOpacity>
+                        )}
                       </>
                     ) : (
-                      <Text className="text-xs text-muted-foreground italic">
-                        Read-only
-                      </Text>
+                      <View className="flex-row items-center">
+                        {entry.task.status === "Done" && (
+                          <View className="flex-row items-center mr-2">
+                            <CheckCircle size={16} color="#22c55e" />
+                            <Text className="text-xs text-green-600 ml-1 font-medium">
+                              Completed
+                            </Text>
+                          </View>
+                        )}
+                        <Text className="text-xs text-muted-foreground italic">
+                          Read-only
+                        </Text>
+                      </View>
                     )}
                   </View>
                 </View>
