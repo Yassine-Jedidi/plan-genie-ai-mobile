@@ -15,7 +15,7 @@ import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { ENTITY_LABELS, REQUIRED_ENTITIES } from "~/constants/entities";
 import { eventsAPI, tasksAPI } from "~/services/api";
-import { PriorityLevel, priorityService } from "~/services/priority";
+import { PriorityLevel, priorityService } from "~/utils/priority";
 
 interface ResultEditorProps {
   result: any;

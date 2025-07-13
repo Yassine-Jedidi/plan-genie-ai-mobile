@@ -1,4 +1,4 @@
-// Priority classification service
+// Priority classification utility
 // Standardizes priority text into consistent categories
 
 export type PriorityLevel = "high" | "medium" | "low";
@@ -435,4 +435,4 @@ export const priorityService = {
     };
     return colors[priority] || "text-amber-500";
   },
-};
+}; 

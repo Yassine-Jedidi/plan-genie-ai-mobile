@@ -24,7 +24,7 @@ import { Spinner } from "../../components/ui/spinner";
 import { useAuth } from "../../contexts/AuthContext";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { tasksAPI } from "../../services/api";
-import { priorityService } from "../../services/priority";
+import { priorityService } from "../../utils/priority";
 
 interface Task {
   id: string;
