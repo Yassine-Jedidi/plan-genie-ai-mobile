@@ -90,13 +90,13 @@ export default function RootLayout() {
           />
         </Stack>
         <PortalHost />
-        <Toast
-          config={{
-            success: (props) => <CustomToast {...props} />,
-            error: (props) => <CustomToast {...props} />,
-          }}
-        />
       </ThemeProvider>
+      <Toast
+        config={{
+          success: (props) => <CustomToast {...props} />,
+          error: (props) => <CustomToast {...props} />,
+        }}
+      />
     </AuthProvider>
   );
 }

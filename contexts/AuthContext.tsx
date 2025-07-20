@@ -1,13 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { authAPI } from "~/services/authAPI";
-
-interface User {
-  id: string;
-  email: string;
-  full_name?: string;
-  avatar_url?: string;
-  // Add other user properties as needed
-}
+import type { User } from "../types/User";
 
 interface AuthContextType {
   user: User | null;

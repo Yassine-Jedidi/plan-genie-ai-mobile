@@ -76,7 +76,7 @@ export const authAPI = {
 
   // Update theme
   updateTheme: async (theme: string, colorTheme: string) => {
-    return apiRequest('/auth/theme', {
+    return apiRequest('/auth/update-theme', {
       method: 'PUT',
       data: { theme, colorTheme },
     });
