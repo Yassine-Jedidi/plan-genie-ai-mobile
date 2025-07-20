@@ -80,6 +80,14 @@ export default function RootLayout() {
               headerShown: true,
             }}
           />
+          <Stack.Screen
+            name="settings"
+            options={{
+              title: "Settings",
+              headerShown: true,
+              presentation: "modal",
+            }}
+          />
         </Stack>
         <PortalHost />
         <Toast

@@ -5,10 +5,12 @@ import { Image, View } from "react-native";
 import { ThemeToggle } from "~/components/themeToggle";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
+import { useColorScheme } from "~/hooks/useColorScheme";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function TabsLayout() {
   const { signOut, user } = useAuth();
+  const { isDarkColorScheme } = useColorScheme();
 
   const handleSignOut = async () => {
     try {
@@ -73,6 +75,17 @@ export default function TabsLayout() {
         headerRight: () => (
           <View className="flex-row items-center">
             <ThemeToggle />
+            <Button
+              variant="ghost"
+              onPress={() => router.navigate("/settings")}
+              className="flex-row items-center justify-center rounded-full mr-2"
+            >
+              <Ionicons
+                name="settings-outline"
+                size={20}
+                color={isDarkColorScheme ? "white" : "black"}
+              />
+            </Button>
             <Button
               variant="destructive"
               onPress={handleSignOut}
