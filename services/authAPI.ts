@@ -67,10 +67,10 @@ export const authAPI = {
   },
 
   // Update profile
-  updateProfile: async (data: any) => {
-    return apiRequest('/auth/profile', {
+  updateNotifications: async (data: any) => {
+    return apiRequest('/notifications/preferences', {
       method: 'PUT',
-      data: { data },
+      data, // send as root, not { data }
     });
   },
 
