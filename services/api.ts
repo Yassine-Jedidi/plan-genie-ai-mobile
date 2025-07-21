@@ -1,10 +1,10 @@
 // Main API exports - importing all separated services
-export { analyticsAPI } from './analyticsService';
-export { bilanAPI } from './bilanService';
-export { dashboardAPI } from './dashboardService';
-export { eventsAPI } from './eventsAPIService';
-export { fastapiAPI } from './fastapiService';
-export { tasksAPI } from './tasksService';
+export { analyticsAPI } from './analyticsAPI';
+export { bilanAPI } from './bilanAPI';
+export { dashboardAPI } from './dashboardAPI';
+export { eventsAPI } from './eventsAPI';
+export { fastapiAPI } from './fastapiAPI';
+export { tasksAPI } from './tasksAPI';
 
 // Re-export authAPI for convenience
 export { authAPI } from './authAPI';

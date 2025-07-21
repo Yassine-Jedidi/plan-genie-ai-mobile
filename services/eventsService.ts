@@ -1,4 +1,4 @@
-import { eventsAPI } from './eventsAPIService';
+import { eventsAPI } from './eventsAPI';
 
 export interface Event {
   id: string;
