@@ -1,17 +1,20 @@
 import { Bell } from "lucide-react-native";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, Switch, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { Text } from "~/components/ui/text";
 import { useAuth } from "~/contexts/AuthContext";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 import notificationsAPI from "~/services/notificationsAPI";
 
 export default function NotificationsSettings() {
   const { user, refreshUser } = useAuth();
   const { isDarkColorScheme } = useColorScheme();
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const [taskNotifications, setTaskNotifications] = React.useState(true);
   const [eventNotifications, setEventNotifications] = React.useState(true);
@@ -38,7 +41,7 @@ export default function NotificationsSettings() {
       await refreshUser();
       Toast.show({
         type: "success",
-        text1: "Preferences updated",
+        text1: t("preferences_updated"),
         position: "top",
       });
     } catch (err) {
@@ -74,20 +77,19 @@ export default function NotificationsSettings() {
         <View className="flex-row items-center px-6 pt-6 pb-2 border-b border-border bg-background rounded-t-3xl">
           <Bell size={24} color={theme} style={{ marginRight: 10 }} />
           <Text className="text-xl font-bold text-foreground">
-            Notification Settings
+            {t("notification_settings")}
           </Text>
         </View>
         <Text className="text-muted-foreground px-6 pt-2 pb-4">
-          Manage your notification preferences. Enable or disable notifications
-          for tasks and events below.
+          {t("manage_notifications")}
         </Text>
         <View className="flex-row items-center justify-between px-6 py-4">
           <View className="flex-1 pr-4">
             <Text className="text-lg font-medium text-foreground mb-1">
-              Task Notifications
+              {t("task_notifications")}
             </Text>
             <Text className="text-sm text-muted-foreground">
-              Get notified about new and updated tasks.
+              {t("get_notified_tasks")}
             </Text>
           </View>
           <Switch
@@ -105,10 +107,10 @@ export default function NotificationsSettings() {
         <View className="flex-row items-center justify-between px-6 py-4">
           <View className="flex-1 pr-4">
             <Text className="text-lg font-medium text-foreground mb-1">
-              Event Notifications
+              {t("event_notifications")}
             </Text>
             <Text className="text-sm text-muted-foreground">
-              Stay updated on upcoming events and reminders.
+              {t("stay_updated_events")}
             </Text>
           </View>
           <Switch

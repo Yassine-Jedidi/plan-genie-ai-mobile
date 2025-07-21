@@ -1,10 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { Text } from "~/components/ui/text";
 import { useAuth } from "~/contexts/AuthContext";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 import themeAPI from "~/services/themeAPI";
 
 export default function AppearanceSettings() {
@@ -18,6 +20,7 @@ export default function AppearanceSettings() {
       : "Default"
   );
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const themes = [
     { key: "Default", color: isDarkColorScheme ? "#232b36" : "#334155" },
@@ -41,16 +44,13 @@ export default function AppearanceSettings() {
       );
       Toast.show({
         type: "success",
-        text1: `Color theme changed`,
-        text2: `${themeKey} theme applied successfully!`,
+        text1: t("color_theme_changed"),
+        text2: t("theme_applied", { theme: themeKey }),
         position: "top",
       });
       await refreshUser();
     } catch (err) {
-      Alert.alert(
-        "Theme Update Failed",
-        "Could not update color theme on server."
-      );
+      Alert.alert(t("theme_update_failed"), t("theme_update_failed_msg"));
     } finally {
       setLoading(false);
     }
@@ -63,10 +63,10 @@ export default function AppearanceSettings() {
           className="text-xl font-bold text-foreground mb-1"
           style={{ color: theme }}
         >
-          Color Theme
+          {t("color_theme")}
         </Text>
         <Text className="text-muted-foreground mb-5">
-          Choose your preferred color theme
+          {t("choose_color_theme")}
         </Text>
         <View className="flex-row flex-wrap justify-between">
           {themes.map((theme) => (
@@ -111,8 +111,7 @@ export default function AppearanceSettings() {
           </View>
         )}
         <Text className="text-xs text-muted-foreground mt-6">
-          Your theme preferences are saved to your account and synchronized
-          across devices.
+          {t("theme_preferences_saved")}
         </Text>
       </View>
     </View>
