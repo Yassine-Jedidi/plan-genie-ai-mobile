@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,12 +11,14 @@ import { ResultEditor } from "~/components/result-editor";
 import { Text } from "~/components/ui/text";
 import { useTextAnalysis } from "~/hooks/useTextAnalysis";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 
 export default function HomeTab() {
   const { result, loading, error, analyzeText, clearResult } =
     useTextAnalysis();
   const [transcribing, setTranscribing] = useState(false);
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <SafeAreaView style={{ flex: 1 }} className="bg-background">
@@ -30,7 +33,7 @@ export default function HomeTab() {
               style={{ color: theme }}
               className="text-2xl font-bold text-center"
             >
-              Home
+              {t("home")}
             </Text>
           )}
 
@@ -38,7 +41,7 @@ export default function HomeTab() {
           {loading && (
             <View className="items-center mb-4">
               <Text className="text-base text-muted-foreground">
-                Processing...
+                {t("processing")}
               </Text>
             </View>
           )}
@@ -50,7 +53,7 @@ export default function HomeTab() {
           {transcribing && (
             <View className="items-center mb-4">
               <Text className="text-base text-muted-foreground">
-                Transcribing your voice...
+                {t("transcribing")}
               </Text>
             </View>
           )}

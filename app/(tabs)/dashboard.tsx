@@ -1,5 +1,6 @@
 import { AlertTriangle, Calendar, Target } from "lucide-react-native";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   RefreshControl,
   SafeAreaView,
@@ -16,12 +17,14 @@ import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { useDashboard } from "~/hooks/useDashboard";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 
 export default function DashboardTab() {
   const { data, loading, error, refetch } = useDashboard();
   const { isDarkColorScheme } = useColorScheme();
   const { theme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
+  const { t } = useTranslation();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -78,7 +81,7 @@ export default function DashboardTab() {
         <View className="flex-1 items-center justify-center">
           <Spinner size="lg" />
           <Text className="text-muted-foreground mt-4">
-            Loading dashboard...
+            {t("loading_dashboard")}
           </Text>
         </View>
       </SafeAreaView>
@@ -100,7 +103,7 @@ export default function DashboardTab() {
             onPress={refetch}
             className="bg-primary px-4 py-2 rounded-lg"
           >
-            <Text className="text-primary-foreground">Retry</Text>
+            <Text className="text-primary-foreground">{t("retry")}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -111,7 +114,7 @@ export default function DashboardTab() {
     return (
       <SafeAreaView className="flex-1 bg-background">
         <View className="flex-1 items-center justify-center">
-          <Text className="text-muted-foreground">No data available</Text>
+          <Text className="text-muted-foreground">{t("no_data")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -154,10 +157,10 @@ export default function DashboardTab() {
               className="text-2xl font-bold text-foreground"
               style={{ color: theme }}
             >
-              Dashboard
+              {t("dashboard")}
             </Text>
             <Text className="text-muted-foreground">
-              Your productivity overview
+              {t("productivity_overview")}
             </Text>
           </View>
 
@@ -170,14 +173,14 @@ export default function DashboardTab() {
                   color={isDarkColorScheme ? "#60a5fa" : "#3b82f6"}
                 />
                 <Text className="ml-2 text-sm text-muted-foreground">
-                  Tasks
+                  {t("tasks")}
                 </Text>
               </View>
               <Text className="text-2xl font-bold text-foreground">
                 {totalTasks}
               </Text>
               <Text className="text-xs text-muted-foreground">
-                {completedTasks} completed
+                {t("completed", { count: completedTasks })}
               </Text>
             </Card>
 
@@ -188,13 +191,15 @@ export default function DashboardTab() {
                   color={isDarkColorScheme ? "#f59e0b" : "#f59e0b"}
                 />
                 <Text className="ml-2 text-sm text-muted-foreground">
-                  Events
+                  {t("events")}
                 </Text>
               </View>
               <Text className="text-2xl font-bold text-foreground">
                 {totalEvents}
               </Text>
-              <Text className="text-xs text-muted-foreground">Scheduled</Text>
+              <Text className="text-xs text-muted-foreground">
+                {t("scheduled")}
+              </Text>
             </Card>
           </View>
         </View>
@@ -202,17 +207,17 @@ export default function DashboardTab() {
         {/* Task Status Distribution */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Task Status Distribution
+            {t("task_status_distribution")}
           </Text>
           <Card className="p-4">
             <PieChart
               data={data.tasksByStatus.map((item) => ({
-                label: item.name,
+                label: t(item.name.toLowerCase()),
                 value: item.count,
                 color: getStatusColor(item.name),
               }))}
               size={200}
-              title="Tasks by Status"
+              title={t("tasks_by_status")}
             />
           </Card>
         </View>
@@ -220,12 +225,12 @@ export default function DashboardTab() {
         {/* Task Deadline Status */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Task Deadline Status
+            {t("task_deadline_status")}
           </Text>
           <Card className="p-4">
             <BarChart
               data={data.tasksByDeadline.map((item) => ({
-                label: item.name,
+                label: t(item.name.toLowerCase().replace(/ /g, "_")),
                 value: item.count,
                 color:
                   item.name === "Completed On Time"
@@ -245,7 +250,7 @@ export default function DashboardTab() {
                     : "#3b82f6",
               }))}
               height={200}
-              title="Tasks by Deadline Status"
+              title={t("tasks_by_deadline_status")}
             />
           </Card>
         </View>
@@ -253,7 +258,7 @@ export default function DashboardTab() {
         {/* Time Spent Per Day */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Time Spent Per Day (Last 7 Days)
+            {t("time_spent_per_day")}
           </Text>
           <Card className="p-4">
             <LineChart
@@ -263,7 +268,7 @@ export default function DashboardTab() {
               }))}
               height={200}
               width={350}
-              title="Minutes Spent Daily"
+              title={t("minutes_spent_daily")}
             />
           </Card>
         </View>
@@ -271,7 +276,7 @@ export default function DashboardTab() {
         {/* Events Per Day */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Events Per Day (Last 7 Days)
+            {t("events_per_day")}
           </Text>
           <Card className="p-4">
             <LineChart
@@ -282,7 +287,7 @@ export default function DashboardTab() {
               height={200}
               width={350}
               color={isDarkColorScheme ? "#f59e0b" : "#f59e0b"}
-              title="Events Daily"
+              title={t("events_daily")}
             />
           </Card>
         </View>
@@ -290,12 +295,12 @@ export default function DashboardTab() {
         {/* Event Distribution */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Event Distribution
+            {t("event_distribution")}
           </Text>
           <Card className="p-4">
             <PieChart
               data={data.eventDistribution.map((item) => ({
-                label: item.name,
+                label: t(item.name.toLowerCase()),
                 value: item.count,
                 color:
                   item.name === "Upcoming"
@@ -307,7 +312,7 @@ export default function DashboardTab() {
                     : "#f59e0b",
               }))}
               size={200}
-              title="Events by Status"
+              title={t("events_by_status")}
             />
           </Card>
         </View>
@@ -315,7 +320,7 @@ export default function DashboardTab() {
         {/* Weekly Completion Rates */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Weekly Completion Rates
+            {t("weekly_completion_rates")}
           </Text>
           <Card className="p-4">
             <BarChart
@@ -325,7 +330,7 @@ export default function DashboardTab() {
                 color: isDarkColorScheme ? "#60a5fa" : "#3b82f6",
               }))}
               height={200}
-              title="Completion Rate (%)"
+              title={t("completion_rate")}
             />
           </Card>
         </View>

@@ -1,6 +1,7 @@
 import * as chrono from "chrono-node";
 import { X } from "lucide-react-native";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import Toast from "react-native-toast-message";
 import { Button } from "~/components/ui/button";
@@ -31,6 +32,7 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
   const [parsedDateObject, setParsedDateObject] = useState<Date | null>(null);
   const [classifiedPriority, setClassifiedPriority] =
     useState<PriorityLevel>("medium");
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (result) {
@@ -113,10 +115,9 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
             minute: "2-digit",
             hour12: false,
           };
-          dateStr = `Interpreted as: ${date.toLocaleDateString(
-            "en-US",
-            options
-          )}`;
+          dateStr = t("interpreted_as", {
+            date: date.toLocaleDateString("en-US", options),
+          });
         }
       }
     } else if (type === "Événement") {
@@ -135,10 +136,9 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
             minute: "2-digit",
             hour12: false,
           };
-          dateStr = `Interpreted as: ${date.toLocaleDateString(
-            "en-US",
-            options
-          )}`;
+          dateStr = t("interpreted_as", {
+            date: date.toLocaleDateString("en-US", options),
+          });
         }
       }
     }
@@ -215,26 +215,30 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
           ? await tasksAPI.saveTask(editableResult.type, entitiesToSave)
           : await eventsAPI.saveEvent(editableResult.type, entitiesToSave);
       console.log("Save result:", result);
-      setSaveSuccess("Task saved successfully!");
+      setSaveSuccess(t("task_saved"));
       onClear();
       Toast.show({
         type: "success",
-        text1: `Your ${
-          editableResult.type === "Tâche" ? "task" : "event"
-        } has been saved.`,
-        text2: "You can now view it in your task list.",
+        text1: t(
+          editableResult.type === "Tâche"
+            ? "your_task_saved"
+            : "your_event_saved"
+        ),
+        text2: t("view_in_list"),
         position: "top",
       });
     } catch (err: any) {
-      setSaveError(err.message || "Failed to save task.");
+      setSaveError(err.message || t("failed_to_save_task"));
       Toast.show({
         type: "error",
-        text1: "Save failed",
+        text1: t("save_failed"),
         text2:
           err.message ||
-          `Failed to save ${
-            editableResult.type === "Tâche" ? "task" : "event"
-          }.`,
+          t(
+            editableResult.type === "Tâche"
+              ? "failed_to_save_task"
+              : "failed_to_save_event"
+          ),
         position: "top",
       });
     } finally {
@@ -267,7 +271,7 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
             </Text>
           </View>
           <Text className="text-lg font-bold text-foreground">
-            {editableResult.type}
+            {t(editableResult.type === "Tâche" ? "tache" : "evenement")}
           </Text>
         </View>
         <View className="mb-2 border border-border rounded overflow-hidden">
@@ -291,10 +295,10 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
                 }
               >
                 <DropdownMenuRadioItem value="Tâche">
-                  <Text>Tâche</Text>
+                  <Text>{t("tache")}</Text>
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="Événement">
-                  <Text>Événement</Text>
+                  <Text>{t("evenement")}</Text>
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
@@ -317,7 +321,7 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
                             classifiedPriority
                           )}`}
                         >
-                          {priorityService.getPriorityLabel(classifiedPriority)}
+                          {t(classifiedPriority)}
                         </Text>
                         <Text className="text-base text-foreground">▼</Text>
                       </View>
@@ -347,7 +351,9 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
                   {editableResult.entities[key] && (
                     <View className="ml-2 mb-1">
                       <Text className="text-xs text-muted-foreground">
-                        Extracted: "{editableResult.entities[key]}"
+                        {t("extracted", {
+                          value: editableResult.entities[key],
+                        })}
                       </Text>
                     </View>
                   )}
@@ -383,7 +389,7 @@ export function ResultEditor({ result, onClear }: ResultEditorProps) {
             disabled={saveLoading}
           >
             <Text className="text-primary-foreground font-semibold">
-              {saveLoading ? "Saving..." : "Save"}
+              {saveLoading ? t("saving") : t("save")}
             </Text>
           </Button>
           {saveSuccess && (

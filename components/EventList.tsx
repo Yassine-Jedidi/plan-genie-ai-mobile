@@ -5,8 +5,10 @@ import {
   Trash2,
 } from "lucide-react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "~/hooks/useColorScheme";
+import "~/lib/i18n";
 import { Event } from "~/services/eventsService";
 
 interface EventListProps {
@@ -23,6 +25,7 @@ export function EventList({
   onDeleteEvent,
 }: EventListProps) {
   const { isDarkColorScheme } = useColorScheme();
+  const { t } = useTranslation();
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -73,12 +76,10 @@ export function EventList({
       <View className="flex-1 items-center justify-center p-8">
         <CalendarIcon size={48} className="text-muted-foreground mb-4" />
         <Text className="text-lg font-medium text-muted-foreground text-center mb-2">
-          {selectedDate ? "No events for this date" : "No events yet"}
+          {selectedDate ? t("no_events_for_date") : t("no_events_yet")}
         </Text>
         <Text className="text-sm text-muted-foreground text-center">
-          {selectedDate
-            ? "Tap the + button to add an event"
-            : "Create your first event to get started"}
+          {selectedDate ? t("tap_to_add_event") : t("create_first_event")}
         </Text>
       </View>
     );

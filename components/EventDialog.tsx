@@ -1,6 +1,7 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Calendar, Clock, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -13,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { useColorScheme } from "~/hooks/useColorScheme";
+import "~/lib/i18n";
 import { Event } from "~/services/eventsService";
 
 interface EventDialogProps {
@@ -35,6 +37,7 @@ export function EventDialog({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const { isDarkColorScheme } = useColorScheme();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (event) {
@@ -51,7 +54,7 @@ export function EventDialog({
 
   const handleSave = () => {
     if (!title.trim()) {
-      Alert.alert("Error", "Please enter an event title");
+      Alert.alert(t("error"), t("please_enter_event_title"));
       return;
     }
 
@@ -130,7 +133,7 @@ export function EventDialog({
               {/* Header */}
               <View className="flex-row items-center justify-between mb-6">
                 <Text className="text-xl font-semibold text-foreground">
-                  {event ? "Edit Event" : "Add Event"}
+                  {event ? t("edit_event") : t("add_event")}
                 </Text>
                 <TouchableOpacity onPress={handleClose} className="p-2">
                   <X size={24} className="text-foreground" />
@@ -140,12 +143,12 @@ export function EventDialog({
               {/* Title Input */}
               <View className="mb-6">
                 <Text className="text-sm font-medium text-foreground mb-2">
-                  Event Title
+                  {t("event_title")}
                 </Text>
                 <TextInput
                   value={title}
                   onChangeText={setTitle}
-                  placeholder="Enter event title"
+                  placeholder={t("enter_event_title")}
                   className="bg-muted rounded-lg p-3 text-foreground border border-border"
                   placeholderTextColor="#6B7280"
                 />
@@ -154,7 +157,7 @@ export function EventDialog({
               {/* Date Selection */}
               <View className="mb-6">
                 <Text className="text-sm font-medium text-foreground mb-2">
-                  Date
+                  {t("date")}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowDatePicker(true)}
@@ -186,7 +189,7 @@ export function EventDialog({
               {/* Time Selection */}
               <View className="mb-8">
                 <Text className="text-sm font-medium text-foreground mb-2">
-                  Time
+                  {t("time")}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowTimePicker(true)}
@@ -222,7 +225,7 @@ export function EventDialog({
                   className="flex-1 bg-muted rounded-lg p-3"
                 >
                   <Text className="text-center font-medium text-foreground">
-                    Cancel
+                    {t("cancel")}
                   </Text>
                 </TouchableOpacity>
 
@@ -231,7 +234,7 @@ export function EventDialog({
                   className="flex-1 bg-primary rounded-lg p-3"
                 >
                   <Text className="text-center font-medium text-primary-foreground">
-                    {event ? "Update" : "Create"}
+                    {event ? t("update") : t("create")}
                   </Text>
                 </TouchableOpacity>
               </View>

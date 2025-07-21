@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 import { Calendar } from "~/components/Calendar";
 import { EventDialog } from "~/components/EventDialog";
@@ -6,6 +7,7 @@ import { EventList } from "~/components/EventList";
 import { Spinner } from "~/components/ui/spinner";
 import { useAuth } from "~/contexts/AuthContext";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 import { Event, eventsService } from "~/services/eventsService";
 
 export default function EventsTab() {
@@ -22,6 +24,7 @@ export default function EventsTab() {
   const [dialogSelectedDate, setDialogSelectedDate] = useState<
     Date | undefined
   >(undefined);
+  const { t } = useTranslation();
 
   // Load events
   const loadEvents = useCallback(async () => {
@@ -33,11 +36,11 @@ export default function EventsTab() {
       setEvents(fetchedEvents);
     } catch (error) {
       console.error("Error loading events:", error);
-      Alert.alert("Error", "Failed to load events. Please try again.");
+      Alert.alert(t("error"), t("event_load_failed"));
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, t]);
 
   // Refresh events
   const onRefresh = useCallback(async () => {
@@ -72,19 +75,19 @@ export default function EventsTab() {
 
   // Handle delete event
   const handleDeleteEvent = async (eventId: string) => {
-    Alert.alert("Delete Event", "Are you sure you want to delete this event?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("delete_event"), t("delete_event_confirm"), [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("delete"),
         style: "destructive",
         onPress: async () => {
           try {
             await eventsService.deleteEvent(eventId);
             await loadEvents(); // Reload events
-            Alert.alert("Success", "Event deleted successfully");
+            Alert.alert(t("success"), t("event_deleted"));
           } catch (error) {
             console.error("Error deleting event:", error);
-            Alert.alert("Error", "Failed to delete event. Please try again.");
+            Alert.alert(t("error"), t("event_delete_failed"));
           }
         },
       },
@@ -97,16 +100,16 @@ export default function EventsTab() {
       if (editingEvent) {
         // Update existing event
         await eventsService.updateEvent(editingEvent.id, title, dateTime);
-        Alert.alert("Success", "Event updated successfully");
+        Alert.alert(t("success"), t("event_updated"));
       } else {
         // Create new event
         await eventsService.createEvent(title, dateTime);
-        Alert.alert("Success", "Event created successfully");
+        Alert.alert(t("success"), t("event_created"));
       }
       await loadEvents(); // Reload events
     } catch (error) {
       console.error("Error saving event:", error);
-      Alert.alert("Error", "Failed to save event. Please try again.");
+      Alert.alert(t("error"), t("event_save_failed"));
     }
   };
 
@@ -121,7 +124,9 @@ export default function EventsTab() {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <Spinner size="lg" className="mb-4" />
-        <Text className="text-lg text-muted-foreground">Loading events...</Text>
+        <Text className="text-lg text-muted-foreground">
+          {t("loading_events")}
+        </Text>
       </View>
     );
   }
@@ -142,11 +147,9 @@ export default function EventsTab() {
               className="text-2xl font-bold text-foreground mb-2"
               style={{ color: theme }}
             >
-              Events
+              {t("events")}
             </Text>
-            <Text className="text-muted-foreground">
-              Manage your events and schedule
-            </Text>
+            <Text className="text-muted-foreground">{t("manage_events")}</Text>
           </View>
 
           {/* Calendar */}
@@ -162,13 +165,15 @@ export default function EventsTab() {
             <View className="bg-muted rounded-lg p-4">
               <Text className="text-lg font-semibold text-foreground">
                 {selectedDate.toDateString() === new Date().toDateString()
-                  ? "Today's Events"
-                  : `Events for ${selectedDate.toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}`}
+                  ? t("todays_events")
+                  : t("events_for", {
+                      date: selectedDate.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      }),
+                    })}
               </Text>
             </View>
           )}
