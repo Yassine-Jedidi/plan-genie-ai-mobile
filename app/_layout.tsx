@@ -13,7 +13,7 @@ import { ArrowLeft } from "lucide-react-native";
 import * as React from "react";
 import { Appearance, Platform } from "react-native";
 import Toast from "react-native-toast-message";
-import { ThemeToggle } from "~/components/themeToggle";
+import { ThemeToggle } from "~/components/ThemeToggle";
 import { Button } from "~/components/ui/button";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
@@ -84,6 +84,14 @@ export default function RootLayout() {
             name="settings"
             options={{
               title: "Settings",
+              headerShown: true,
+              presentation: "modal",
+            }}
+          />
+          <Stack.Screen
+            name="profile"
+            options={{
+              title: "Profile",
               headerShown: true,
               presentation: "modal",
             }}

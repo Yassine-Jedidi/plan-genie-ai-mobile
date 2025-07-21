@@ -37,6 +37,13 @@ export const authAPI = {
   getCurrentUser: async () => {
     return apiRequest('/auth/me', { method: 'GET' });
   },
+
+  updateProfile: async (data: { full_name: string; avatar_url?: string }) => {
+    return apiRequest('/auth/update-profile', {
+      method: 'PUT',
+      data: { data },
+    });
+  },
 };
 
 export default authAPI;

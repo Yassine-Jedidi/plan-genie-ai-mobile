@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, router } from "expo-router";
 import * as React from "react";
-import { Image, View } from "react-native";
-import { ThemeToggle } from "~/components/themeToggle";
+import { Image, TouchableOpacity, View } from "react-native";
+import { ThemeToggle } from "~/components/ThemeToggle";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
@@ -68,9 +68,11 @@ export default function TabsLayout() {
               />
             )}
             {user?.full_name && (
-              <Text className="text-sm text-foreground ml-3 font-medium">
-                {user.full_name}
-              </Text>
+              <TouchableOpacity onPress={() => router.push("../profile")}>
+                <Text className="text-sm text-foreground ml-3 font-medium">
+                  {user.full_name}
+                </Text>
+              </TouchableOpacity>
             )}
           </View>
         ),
