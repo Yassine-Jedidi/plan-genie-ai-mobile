@@ -68,7 +68,7 @@ export function EventDialog({
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
+    // Do not hide the date picker automatically
     if (selectedDate) {
       const newDateTime = new Date(dateTime);
       newDateTime.setFullYear(selectedDate.getFullYear());
@@ -79,7 +79,7 @@ export function EventDialog({
   };
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setShowTimePicker(false);
+    // Do not hide the time picker automatically
     if (selectedTime) {
       const newDateTime = new Date(dateTime);
       newDateTime.setHours(selectedTime.getHours());
