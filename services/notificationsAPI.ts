@@ -8,6 +8,11 @@ export const notificationsAPI = {
       data,
     });
   },
+  getNotifications: async () => {
+    return apiRequest('/notifications/preferences', {
+      method: 'GET'
+    });
+  },
 };
 
 export default notificationsAPI; 

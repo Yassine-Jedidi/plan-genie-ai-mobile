@@ -1,5 +1,5 @@
 import { Bell } from "lucide-react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Alert, Switch, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { Text } from "~/components/ui/text";
@@ -13,12 +13,8 @@ export default function NotificationsSettings() {
   const { isDarkColorScheme } = useColorScheme();
   const { theme } = useTheme();
 
-  const [taskNotifications, setTaskNotifications] = React.useState(
-    user?.user_metadata?.taskNotifications ?? true
-  );
-  const [eventNotifications, setEventNotifications] = React.useState(
-    user?.user_metadata?.eventNotifications ?? true
-  );
+  const [taskNotifications, setTaskNotifications] = React.useState(true);
+  const [eventNotifications, setEventNotifications] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
 
   const gray = isDarkColorScheme ? "#22223b" : "#e5e7eb";
@@ -51,6 +47,23 @@ export default function NotificationsSettings() {
       setLoading(false);
     }
   };
+
+  const getNotifications = async () => {
+    setLoading(true);
+    try {
+      const response = await notificationsAPI.getNotifications();
+      setTaskNotifications(response.receive_task_notifications);
+      setEventNotifications(response.receive_event_notifications);
+    } catch (err) {
+      Alert.alert("Fetch Failed", "Could not fetch notification settings.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getNotifications();
+  }, []);
 
   return (
     <View className="px-2 pt-6 bg-background min-h-full">
