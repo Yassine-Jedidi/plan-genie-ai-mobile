@@ -12,9 +12,10 @@ import Toast from "react-native-toast-message";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { useTheme } from "~/hooks/useTheme";
+import notificationsAPI from "~/services/notificationsAPI";
+import themeAPI from "~/services/themeAPI";
 import { Colors } from "../constants/Colors";
 import { useAuth } from "../contexts/AuthContext";
-import { authAPI } from "../services/authAPI";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -46,7 +47,7 @@ function AppearanceScreen() {
     setLoading(true);
     setSelected(themeKey);
     try {
-      await authAPI.updateTheme(
+      await themeAPI.updateTheme(
         user?.user_metadata?.theme || "system",
         themeKey.toLowerCase()
       );
@@ -162,7 +163,7 @@ function NotificationsScreen() {
           receive_event_notifications: value,
         };
       }
-      await authAPI.updateNotifications(payload);
+      await notificationsAPI.updateNotifications(payload);
       await refreshUser();
       Toast.show({
         type: "success",
