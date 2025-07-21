@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTheme } from "~/hooks/useTheme";
 import { BilanEntryDialog } from "../../components/BilanEntryDialog";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -62,6 +63,7 @@ export default function DailyTab() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [editingEntry, setEditingEntry] = useState<BilanEntry | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -286,7 +288,10 @@ export default function DailyTab() {
     <View className="flex-1 bg-background">
       {/* Header */}
       <View className="p-4 border-b border-border">
-        <Text className="text-2xl font-bold text-foreground mb-2">
+        <Text
+          className="text-2xl font-bold text-foreground mb-2"
+          style={{ color: theme }}
+        >
           Daily Summary
         </Text>
 

@@ -15,10 +15,12 @@ import { Spinner } from "~/components/ui/spinner";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { useDashboard } from "~/hooks/useDashboard";
+import { useTheme } from "~/hooks/useTheme";
 
 export default function DashboardTab() {
   const { data, loading, error, refetch } = useDashboard();
   const { isDarkColorScheme } = useColorScheme();
+  const { theme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -148,7 +150,10 @@ export default function DashboardTab() {
         {/* Header */}
         <View className="px-4 pt-4 pb-6">
           <View className="mb-4">
-            <Text className="text-2xl font-bold text-foreground">
+            <Text
+              className="text-2xl font-bold text-foreground"
+              style={{ color: theme }}
+            >
               Dashboard
             </Text>
             <Text className="text-muted-foreground">

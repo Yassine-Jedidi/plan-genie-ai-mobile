@@ -5,10 +5,12 @@ import { EventDialog } from "~/components/EventDialog";
 import { EventList } from "~/components/EventList";
 import { Spinner } from "~/components/ui/spinner";
 import { useAuth } from "~/contexts/AuthContext";
+import { useTheme } from "~/hooks/useTheme";
 import { Event, eventsService } from "~/services/eventsService";
 
 export default function EventsTab() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -136,7 +138,10 @@ export default function EventsTab() {
         <View className="p-4 space-y-6">
           {/* Header */}
           <View>
-            <Text className="text-2xl font-bold text-foreground mb-2">
+            <Text
+              className="text-2xl font-bold text-foreground mb-2"
+              style={{ color: theme }}
+            >
               Events
             </Text>
             <Text className="text-muted-foreground">

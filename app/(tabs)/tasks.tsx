@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
+import { useTheme } from "~/hooks/useTheme";
 import { EditTaskDialog } from "../../components/EditTaskDialog";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -58,6 +59,7 @@ export default function TasksTab() {
   const [error, setError] = useState<string | null>(null);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -506,7 +508,12 @@ export default function TasksTab() {
   return (
     <View className="flex-1 bg-background">
       <View className="flex-row justify-between items-center px-5 pt-6 pb-3 bg-background">
-        <Text className="text-2xl font-bold text-foreground">Tasks</Text>
+        <Text
+          className="text-2xl font-bold text-foreground"
+          style={{ color: theme }}
+        >
+          Tasks
+        </Text>
         <Text className="text-sm text-muted-foreground">
           {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
         </Text>

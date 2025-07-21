@@ -23,12 +23,14 @@ import { StatsCard } from "~/components/ui/stats-card";
 import { Text } from "~/components/ui/text";
 import { useAnalytics } from "~/hooks/useAnalytics";
 import { useColorScheme } from "~/hooks/useColorScheme";
+import { useTheme } from "~/hooks/useTheme";
 
 type TimeFrame = "today" | "thisWeek" | "thisMonth" | "all";
 
 export default function AnalyticsTab() {
   const { data, loading, error, refetch } = useAnalytics();
   const { isDarkColorScheme } = useColorScheme();
+  const { theme } = useTheme();
   const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>("all");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -124,7 +126,10 @@ export default function AnalyticsTab() {
       >
         {/* Header */}
         <View className="px-4 pt-4 pb-6">
-          <Text className="text-2xl font-bold text-foreground mb-2">
+          <Text
+            className="text-2xl font-bold text-foreground mb-2"
+            style={{ color: theme }}
+          >
             Analytics
           </Text>
           <Text className="text-muted-foreground">

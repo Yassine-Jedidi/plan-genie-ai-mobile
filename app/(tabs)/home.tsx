@@ -9,11 +9,13 @@ import { InputBar } from "~/components/input-bar";
 import { ResultEditor } from "~/components/result-editor";
 import { Text } from "~/components/ui/text";
 import { useTextAnalysis } from "~/hooks/useTextAnalysis";
+import { useTheme } from "~/hooks/useTheme";
 
 export default function HomeTab() {
   const { result, loading, error, analyzeText, clearResult } =
     useTextAnalysis();
   const [transcribing, setTranscribing] = useState(false);
+  const { theme } = useTheme();
 
   return (
     <SafeAreaView style={{ flex: 1 }} className="bg-background">
@@ -24,7 +26,10 @@ export default function HomeTab() {
       >
         <View className="flex-1 justify-center px-4">
           {!result && (
-            <Text className="text-2xl font-bold text-foreground text-center">
+            <Text
+              style={{ color: theme }}
+              className="text-2xl font-bold text-center"
+            >
               Home
             </Text>
           )}

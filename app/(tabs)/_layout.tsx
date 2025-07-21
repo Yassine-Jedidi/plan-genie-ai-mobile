@@ -6,11 +6,13 @@ import { ThemeToggle } from "~/components/themeToggle";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
+import { useTheme } from "~/hooks/useTheme";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function TabsLayout() {
   const { signOut, user } = useAuth();
   const { isDarkColorScheme } = useColorScheme();
+  const { theme } = useTheme();
 
   const handleSignOut = async () => {
     try {
@@ -97,12 +99,30 @@ export default function TabsLayout() {
         ),
       })}
     >
-      <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="tasks" options={{ title: "Tasks" }} />
-      <Tabs.Screen name="events" options={{ title: "Events" }} />
-      <Tabs.Screen name="daily" options={{ title: "Daily" }} />
-      <Tabs.Screen name="analytics" options={{ title: "Analytics" }} />
-      <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
+      <Tabs.Screen
+        name="home"
+        options={{ title: "Home", tabBarActiveTintColor: theme }}
+      />
+      <Tabs.Screen
+        name="tasks"
+        options={{ title: "Tasks", tabBarActiveTintColor: theme }}
+      />
+      <Tabs.Screen
+        name="events"
+        options={{ title: "Events", tabBarActiveTintColor: theme }}
+      />
+      <Tabs.Screen
+        name="daily"
+        options={{ title: "Daily", tabBarActiveTintColor: theme }}
+      />
+      <Tabs.Screen
+        name="analytics"
+        options={{ title: "Analytics", tabBarActiveTintColor: theme }}
+      />
+      <Tabs.Screen
+        name="dashboard"
+        options={{ title: "Dashboard", tabBarActiveTintColor: theme }}
+      />
     </Tabs>
   );
 }
