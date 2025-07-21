@@ -1,18 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, router } from "expo-router";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { Image, TouchableOpacity, View } from "react-native";
 import { ThemeToggle } from "~/components/ThemeToggle";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function TabsLayout() {
   const { signOut, user } = useAuth();
   const { isDarkColorScheme } = useColorScheme();
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const handleSignOut = async () => {
     try {
@@ -103,27 +106,27 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="home"
-        options={{ title: "Home", tabBarActiveTintColor: theme }}
+        options={{ title: t("home"), tabBarActiveTintColor: theme }}
       />
       <Tabs.Screen
         name="tasks"
-        options={{ title: "Tasks", tabBarActiveTintColor: theme }}
+        options={{ title: t("tasks"), tabBarActiveTintColor: theme }}
       />
       <Tabs.Screen
         name="events"
-        options={{ title: "Events", tabBarActiveTintColor: theme }}
+        options={{ title: t("events"), tabBarActiveTintColor: theme }}
       />
       <Tabs.Screen
         name="daily"
-        options={{ title: "Daily", tabBarActiveTintColor: theme }}
+        options={{ title: t("daily_summary"), tabBarActiveTintColor: theme }}
       />
       <Tabs.Screen
         name="analytics"
-        options={{ title: "Analytics", tabBarActiveTintColor: theme }}
+        options={{ title: t("analytics"), tabBarActiveTintColor: theme }}
       />
       <Tabs.Screen
         name="dashboard"
-        options={{ title: "Dashboard", tabBarActiveTintColor: theme }}
+        options={{ title: t("dashboard"), tabBarActiveTintColor: theme }}
       />
     </Tabs>
   );

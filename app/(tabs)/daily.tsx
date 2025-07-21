@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   RefreshControl,
@@ -19,6 +20,7 @@ import {
   View,
 } from "react-native";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 import { BilanEntryDialog } from "../../components/BilanEntryDialog";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -52,6 +54,7 @@ interface Bilan {
 export default function DailyTab() {
   const { user, loading: authLoading } = useAuth();
   const { isDarkColorScheme } = useColorScheme();
+  const { t } = useTranslation();
 
   // State
   const [currentBilan, setCurrentBilan] = useState<Bilan | null>(null);
@@ -87,7 +90,7 @@ export default function DailyTab() {
       setTasks(tasksData);
     } catch (error) {
       console.error("Error fetching data:", error);
-      Alert.alert("Error", "Failed to load data");
+      Alert.alert(t("error"), t("failed_to_load_data"));
     } finally {
       setLoading(false);
     }
@@ -163,20 +166,17 @@ export default function DailyTab() {
 
   const handleMarkTaskAsDone = async (task: Task) => {
     if (task.status === "Done") {
-      Alert.alert(
-        "Task Already Completed",
-        "This task is already marked as done."
-      );
+      Alert.alert(t("task_already_completed"), t("task_already_completed_msg"));
       return;
     }
 
     Alert.alert(
-      "Mark Task as Done",
-      `Do you want to mark "${task.title}" as completed?\n\nThis will update the task status to "Done" and record the completion time.`,
+      t("mark_task_as_done"),
+      t("mark_task_as_done_confirm", { title: task.title }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Mark as Done",
+          text: t("mark_as_done"),
           style: "default",
           onPress: async () => {
             try {
@@ -191,13 +191,10 @@ export default function DailyTab() {
               // Refresh data to show updated task status
               await fetchData();
 
-              Alert.alert("Success", "Task marked as completed!");
+              Alert.alert(t("success"), t("task_marked_completed"));
             } catch (error) {
               console.error("Error updating task:", error);
-              Alert.alert(
-                "Error",
-                "Failed to mark task as completed. Please try again."
-              );
+              Alert.alert(t("error"), t("failed_to_mark_task_completed"));
             }
           },
         },
@@ -279,7 +276,9 @@ export default function DailyTab() {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <Spinner size="lg" />
-        <Text className="mt-4 text-foreground">Loading daily summary...</Text>
+        <Text className="mt-4 text-foreground">
+          {t("loading_daily_summary")}
+        </Text>
       </View>
     );
   }
@@ -292,7 +291,7 @@ export default function DailyTab() {
           className="text-2xl font-bold text-foreground mb-2"
           style={{ color: theme }}
         >
-          Daily Summary
+          {t("daily_summary")}
         </Text>
 
         {/* Date Navigation */}
@@ -313,7 +312,7 @@ export default function DailyTab() {
             </Text>
             {!isToday() && (
               <Text className="text-xs text-muted-foreground mt-1">
-                Viewing past date
+                {t("viewing_past_date")}
               </Text>
             )}
           </View>
@@ -350,7 +349,7 @@ export default function DailyTab() {
                   color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
                 />
                 <Text className="ml-2 text-sm text-muted-foreground">
-                  Total Time
+                  {t("total_time")}
                 </Text>
               </View>
               <Text className="text-lg font-bold text-foreground mt-1">
@@ -367,7 +366,7 @@ export default function DailyTab() {
                   color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
                 />
                 <Text className="ml-2 text-sm text-muted-foreground">
-                  Tasks
+                  {t("tasks_label")}
                 </Text>
               </View>
               <Text className="text-lg font-bold text-foreground mt-1">
@@ -391,7 +390,7 @@ export default function DailyTab() {
               <View className="flex-row items-center justify-center">
                 <Plus size={16} color={isDarkColorScheme ? "#000" : "#fff"} />
                 <Text className="ml-2 text-primary-foreground font-medium">
-                  Add Time Entry
+                  {t("add_time_entry")}
                 </Text>
               </View>
             </Button>
@@ -408,7 +407,7 @@ export default function DailyTab() {
                   color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
                 />
                 <Text className="ml-2 text-foreground font-medium">
-                  Back to Today
+                  {t("back_to_today")}
                 </Text>
               </View>
             </Button>
@@ -418,7 +417,7 @@ export default function DailyTab() {
         {/* Time Entries */}
         <View className="px-4 pb-4 mt-4">
           <Text className="text-lg font-semibold text-foreground mb-3">
-            Time Entries
+            {t("time_entries")}
           </Text>
 
           {currentBilan?.entries.length === 0 ? (
@@ -429,12 +428,12 @@ export default function DailyTab() {
                   color={isDarkColorScheme ? "#9ca3af" : "#6b7280"}
                 />
                 <Text className="text-lg font-medium text-foreground mt-2">
-                  No time entries yet
+                  {t("no_time_entries_yet")}
                 </Text>
                 <Text className="text-sm text-muted-foreground text-center mt-1">
                   {isToday()
-                    ? "Start tracking your time by adding your first entry"
-                    : "No entries recorded for this date"}
+                    ? t("start_tracking_time")
+                    : t("no_entries_for_date")}
                 </Text>
               </View>
             </Card>
@@ -499,12 +498,12 @@ export default function DailyTab() {
                         <TouchableOpacity
                           onPress={() => {
                             Alert.alert(
-                              "Delete Entry",
-                              "Are you sure you want to delete this entry?",
+                              t("delete_entry"),
+                              t("delete_entry_confirm"),
                               [
-                                { text: "Cancel", style: "cancel" },
+                                { text: t("cancel"), style: "cancel" },
                                 {
-                                  text: "Delete",
+                                  text: t("delete"),
                                   style: "destructive",
                                   onPress: () => handleDeleteEntry(entry.id),
                                 },
@@ -530,12 +529,12 @@ export default function DailyTab() {
                           <View className="flex-row items-center mr-2">
                             <CheckCircle size={16} color="#22c55e" />
                             <Text className="text-xs text-green-600 ml-1 font-medium">
-                              Completed
+                              {t("completed_label")}
                             </Text>
                           </View>
                         )}
                         <Text className="text-xs text-muted-foreground italic">
-                          Read-only
+                          {t("read_only")}
                         </Text>
                       </View>
                     )}
@@ -550,7 +549,7 @@ export default function DailyTab() {
         {isToday() && recentBilans.length > 1 && (
           <View className="px-4 pb-4">
             <Text className="text-lg font-semibold text-foreground mb-3">
-              Recent Days
+              {t("recent_days")}
             </Text>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>

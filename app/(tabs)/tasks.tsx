@@ -8,6 +8,7 @@ import {
   Trash2,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   RefreshControl,
@@ -18,6 +19,7 @@ import {
 } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 import { EditTaskDialog } from "../../components/EditTaskDialog";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -60,6 +62,7 @@ export default function TasksTab() {
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -74,7 +77,7 @@ export default function TasksTab() {
       const data = await tasksAPI.getTasks();
       setTasks(data);
     } catch (err) {
-      setError("Failed to load tasks. Please try again.");
+      setError(t("failed_to_load_data"));
     } finally {
       setLoading(false);
     }
@@ -228,17 +231,17 @@ export default function TasksTab() {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    Alert.alert("Delete Task", "Are you sure you want to delete this task?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("delete_task"), t("delete_task_confirm"), [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("delete"),
         style: "destructive",
         onPress: async () => {
           try {
             await tasksAPI.deleteTask(taskId);
             setTasks(tasks.filter((task) => task.id !== taskId));
           } catch (err) {
-            Alert.alert("Error", "Failed to delete task. Please try again.");
+            Alert.alert(t("error"), t("failed_to_delete_task"));
           }
         },
       },
@@ -271,10 +274,10 @@ export default function TasksTab() {
     }
 
     // Show confirmation dialog
-    Alert.alert("Change Status", confirmMessage, [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("change_status"), confirmMessage, [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "Yes",
+        text: t("yes"),
         onPress: async () => {
           try {
             await tasksAPI.updateTask(task.id, {
@@ -292,7 +295,7 @@ export default function TasksTab() {
               )
             );
           } catch (err) {
-            Alert.alert("Error", "Failed to update task. Please try again.");
+            Alert.alert(t("error"), t("failed_to_update_task"));
           }
         },
       },
@@ -391,14 +394,14 @@ export default function TasksTab() {
           onPress={() => handleEditTask(item)}
         >
           <Edit size={20} color="#fff" />
-          <Text className="text-white text-xs mt-1">Edit</Text>
+          <Text className="text-white text-xs mt-1">{t("edit")}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="items-center justify-center w-16 h-full bg-red-500"
           onPress={() => handleDeleteTask(item.id)}
         >
           <Trash2 size={20} color="#fff" />
-          <Text className="text-white text-xs mt-1">Delete</Text>
+          <Text className="text-white text-xs mt-1">{t("delete")}</Text>
         </TouchableOpacity>
       </View>
     ),
@@ -512,10 +515,13 @@ export default function TasksTab() {
           className="text-2xl font-bold text-foreground"
           style={{ color: theme }}
         >
-          Tasks
+          {t("tasks")}
         </Text>
         <Text className="text-sm text-muted-foreground">
-          {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
+          {filteredTasks.length}{" "}
+          {filteredTasks.length === 1
+            ? t("task_label")
+            : t("tasks_label_plural")}
         </Text>
       </View>
 
@@ -527,30 +533,34 @@ export default function TasksTab() {
           className="px-5 py-3"
           contentContainerStyle={{ paddingRight: 20 }}
         >
-          <FilterChip filter="all" label="All" count={getFilterCount("all")} />
+          <FilterChip
+            filter="all"
+            label={t("all")}
+            count={getFilterCount("all")}
+          />
           <FilterChip
             filter="today"
-            label="Today"
+            label={t("today")}
             count={getFilterCount("today")}
           />
           <FilterChip
             filter="tomorrow"
-            label="Tomorrow"
+            label={t("tomorrow")}
             count={getFilterCount("tomorrow")}
           />
           <FilterChip
             filter="this-week"
-            label="This Week"
+            label={t("this_week_label")}
             count={getFilterCount("this-week")}
           />
           <FilterChip
             filter="overdue"
-            label="Overdue"
+            label={t("overdue")}
             count={getFilterCount("overdue")}
           />
           <FilterChip
             filter="completed"
-            label="Completed"
+            label={t("completed_filter")}
             count={getFilterCount("completed")}
           />
         </ScrollView>
@@ -571,12 +581,12 @@ export default function TasksTab() {
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center bg-background p-6">
             <Text className="text-lg text-muted-foreground mb-2 text-center">
-              No tasks found
+              {t("no_tasks_found")}
             </Text>
             <Text className="text-sm text-muted-foreground text-center">
               {selectedFilter === "all"
-                ? "Create your first task to get started"
-                : `No tasks for ${selectedFilter.replace("-", " ")}`}
+                ? t("create_first_task")
+                : t("no_tasks_for_filter", { filter: t(selectedFilter) })}
             </Text>
           </View>
         }

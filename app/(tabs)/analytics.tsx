@@ -8,6 +8,7 @@ import {
   TrendingUp,
 } from "lucide-react-native";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   RefreshControl,
   SafeAreaView,
@@ -24,6 +25,7 @@ import { Text } from "~/components/ui/text";
 import { useAnalytics } from "~/hooks/useAnalytics";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { useTheme } from "~/hooks/useTheme";
+import "~/lib/i18n";
 
 type TimeFrame = "today" | "thisWeek" | "thisMonth" | "all";
 
@@ -33,12 +35,13 @@ export default function AnalyticsTab() {
   const { theme } = useTheme();
   const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>("all");
   const [refreshing, setRefreshing] = useState(false);
+  const { t } = useTranslation();
 
   const timeFrames = [
-    { key: "today", label: "Today", icon: Calendar },
-    { key: "thisWeek", label: "This Week", icon: BarChart3 },
-    { key: "thisMonth", label: "This Month", icon: TrendingUp },
-    { key: "all", label: "All Time", icon: Activity },
+    { key: "today", label: t("today"), icon: Calendar },
+    { key: "thisWeek", label: t("this_week"), icon: BarChart3 },
+    { key: "thisMonth", label: t("this_month"), icon: TrendingUp },
+    { key: "all", label: t("all_time"), icon: Activity },
   ] as const;
 
   const onRefresh = async () => {
@@ -75,7 +78,7 @@ export default function AnalyticsTab() {
         <View className="flex-1 items-center justify-center">
           <Spinner size="lg" />
           <Text className="text-muted-foreground mt-4">
-            Loading analytics...
+            {t("loading_analytics")}
           </Text>
         </View>
       </SafeAreaView>
@@ -95,7 +98,7 @@ export default function AnalyticsTab() {
             className="flex-row items-center bg-primary px-4 py-2 rounded-lg"
           >
             <RefreshCw size={16} color="white" />
-            <Text className="text-white ml-2">Retry</Text>
+            <Text className="text-white ml-2">{t("retry")}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -107,7 +110,7 @@ export default function AnalyticsTab() {
       <SafeAreaView className="flex-1 bg-background">
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground">
-            No analytics data available
+            {t("no_analytics_data")}
           </Text>
         </View>
       </SafeAreaView>
@@ -130,10 +133,10 @@ export default function AnalyticsTab() {
             className="text-2xl font-bold text-foreground mb-2"
             style={{ color: theme }}
           >
-            Analytics
+            {t("analytics")}
           </Text>
           <Text className="text-muted-foreground">
-            Track your productivity and task completion
+            {t("track_productivity")}
           </Text>
         </View>
 
@@ -218,27 +221,29 @@ export default function AnalyticsTab() {
         {/* Key Stats */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Key Metrics
+            {t("key_metrics")}
           </Text>
           <View className="space-y-3">
             <StatsCard
-              title="Time Worked"
+              title={t("time_worked")}
               value={formatTime(currentData.totalMinutesWorked)}
-              subtitle="Total minutes spent on tasks"
+              subtitle={t("total_minutes_spent")}
               icon={Clock}
               iconColor={isDarkColorScheme ? "#60a5fa" : "#3b82f6"}
             />
             <StatsCard
-              title="Overdue Tasks"
+              title={t("overdue_tasks")}
               value={currentData.overdue}
-              subtitle="Tasks past deadline"
+              subtitle={t("tasks_past_deadline")}
               icon={AlertTriangle}
               iconColor={isDarkColorScheme ? "#f87171" : "#ef4444"}
             />
             <StatsCard
-              title="Events"
+              title={t("events")}
               value={currentData.events.totalEvents}
-              subtitle={`${currentData.events.upcomingEvents} upcoming, ${currentData.events.pastEvents} past`}
+              subtitle={`${currentData.events.upcomingEvents} ${t(
+                "upcoming"
+              )}, ${currentData.events.pastEvents} ${t("past")}`}
               icon={Calendar}
               iconColor={isDarkColorScheme ? "#34d399" : "#10b981"}
             />
@@ -248,29 +253,29 @@ export default function AnalyticsTab() {
         {/* Priority Distribution */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Priority Distribution
+            {t("priority_distribution")}
           </Text>
           <Card className="p-4">
             <BarChart
               data={[
                 {
-                  label: "High",
+                  label: t("high"),
                   value: currentData.priorityCounts.high,
                   color: isDarkColorScheme ? "#f87171" : "#ef4444",
                 },
                 {
-                  label: "Medium",
+                  label: t("medium"),
                   value: currentData.priorityCounts.medium,
                   color: isDarkColorScheme ? "#fbbf24" : "#f59e0b",
                 },
                 {
-                  label: "Low",
+                  label: t("low"),
                   value: currentData.priorityCounts.low,
                   color: isDarkColorScheme ? "#34d399" : "#10b981",
                 },
               ]}
               height={100}
-              title="Tasks by Priority"
+              title={t("tasks_by_priority")}
             />
           </Card>
         </View>
@@ -278,29 +283,29 @@ export default function AnalyticsTab() {
         {/* Time Spent by Priority */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Time Spent by Priority
+            {t("time_spent_by_priority")}
           </Text>
           <Card className="p-4">
             <BarChart
               data={[
                 {
-                  label: "High",
+                  label: t("high"),
                   value: currentData.minutesSpentByPriority.high,
                   color: isDarkColorScheme ? "#f87171" : "#ef4444",
                 },
                 {
-                  label: "Medium",
+                  label: t("medium"),
                   value: currentData.minutesSpentByPriority.medium,
                   color: isDarkColorScheme ? "#fbbf24" : "#f59e0b",
                 },
                 {
-                  label: "Low",
+                  label: t("low"),
                   value: currentData.minutesSpentByPriority.low,
                   color: isDarkColorScheme ? "#34d399" : "#10b981",
                 },
               ]}
               height={100}
-              title="Minutes Spent"
+              title={t("minutes_spent")}
             />
           </Card>
         </View>
@@ -309,13 +314,13 @@ export default function AnalyticsTab() {
         {currentData.overdue > 0 && (
           <View className="px-4 mb-6">
             <Text className="text-lg font-semibold text-foreground mb-4">
-              Overdue Breakdown
+              {t("overdue_breakdown")}
             </Text>
             <Card className="p-4">
               <View className="space-y-3">
                 <View className="flex-row justify-between items-center">
                   <Text className="text-sm text-muted-foreground">
-                    1-3 days
+                    {t("days_1_3")}
                   </Text>
                   <Text className="font-semibold text-foreground">
                     {currentData.overdue1_3Days}
@@ -323,14 +328,16 @@ export default function AnalyticsTab() {
                 </View>
                 <View className="flex-row justify-between items-center">
                   <Text className="text-sm text-muted-foreground">
-                    4-7 days
+                    {t("days_4_7")}
                   </Text>
                   <Text className="font-semibold text-foreground">
                     {currentData.overdue4_7Days}
                   </Text>
                 </View>
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-sm text-muted-foreground">7+ days</Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {t("days_7_plus")}
+                  </Text>
                   <Text className="font-semibold text-foreground">
                     {currentData.overdueMoreThan7Days}
                   </Text>
@@ -343,7 +350,7 @@ export default function AnalyticsTab() {
         {/* Completion by Priority */}
         <View className="px-4 mb-6">
           <Text className="text-lg font-semibold text-foreground mb-4">
-            Completion by Priority
+            {t("completion_by_priority")}
           </Text>
           <Card className="p-4">
             <View className="space-y-4">
@@ -362,7 +369,7 @@ export default function AnalyticsTab() {
                   <View key={priority} className="space-y-2">
                     <View className="flex-row justify-between items-center">
                       <Text className="text-sm font-medium text-foreground capitalize">
-                        {priority} Priority
+                        {t(priority)} {t("priority")}
                       </Text>
                       <Text className="text-sm text-muted-foreground">
                         {done}/{total} ({Math.round(percentage)}%)
