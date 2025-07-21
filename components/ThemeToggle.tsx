@@ -4,7 +4,7 @@ import { useColorScheme } from "~/hooks/useColorScheme";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { MoonStar } from "~/lib/icons/MoonStar";
 import { Sun } from "~/lib/icons/Sun";
-import { authAPI } from "~/services/authAPI";
+import themeAPI from "~/services/themeAPI";
 import { useAuth } from "../contexts/AuthContext";
 
 export function ThemeToggle() {
@@ -27,7 +27,7 @@ export function ThemeToggle() {
     if (user) {
       setLoading(true);
       try {
-        await authAPI.updateTheme(newTheme, user.user_metadata?.colorTheme!);
+        await themeAPI.updateTheme(newTheme, user.user_metadata?.colorTheme!);
         await refreshUser();
       } catch (err) {
         Alert.alert("Theme Update Failed", "Could not update theme on server.");
