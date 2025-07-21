@@ -29,8 +29,34 @@ export function AudioRecorder({
   // Request recording permissions on component mount
   useEffect(() => {
     (async () => {
-      const { status } = await Audio.requestPermissionsAsync();
-      setRecordingPermission(status === "granted");
+      try {
+        const { status, canAskAgain, granted } =
+          await Audio.requestPermissionsAsync();
+        console.log(
+          "[AudioRecorder] Microphone permission status:",
+          status,
+          "granted:",
+          granted,
+          "canAskAgain:",
+          canAskAgain
+        );
+        setRecordingPermission(status === "granted");
+        if (status !== "granted") {
+          Alert.alert(
+            "Microphone Permission",
+            "Microphone permission is not granted. Please enable it in Settings."
+          );
+        }
+      } catch (err) {
+        console.error(
+          "[AudioRecorder] Error requesting microphone permission:",
+          err
+        );
+        Alert.alert(
+          "Error",
+          "Failed to request microphone permission. Please try again."
+        );
+      }
     })();
   }, []);
 
@@ -40,6 +66,9 @@ export function AudioRecorder({
         Alert.alert(
           "Permission Required",
           "Please grant microphone permission to record audio."
+        );
+        console.warn(
+          "[AudioRecorder] Attempted to start recording without permission."
         );
         return;
       }
@@ -64,9 +93,9 @@ export function AudioRecorder({
         text2: "Tap the microphone again to stop",
         position: "top",
       });
-    } catch (err) {
-      console.error("Failed to start recording", err);
-      Alert.alert("Error", "Failed to start recording. Please try again.");
+    } catch (err: any) {
+      console.error("[AudioRecorder] Failed to start recording", err);
+      Alert.alert("Error", `Failed to start recording. ${err?.message || ""}`);
     }
   };
 
@@ -93,11 +122,16 @@ export function AudioRecorder({
 
     try {
       // Create a file object from the audio URI
+      console.log(
+        "[AudioRecorder] handleTranscription called with URI:",
+        audioUri
+      );
       const audioFile = {
         uri: audioUri,
-        type: "audio/wav",
+        type: "audio/x-wav",
         name: "recording.wav",
       };
+      console.log("[AudioRecorder] Audio file object:", audioFile);
 
       // Import the API here to avoid circular dependencies
       const { fastapiAPI } = await import("~/services/api");

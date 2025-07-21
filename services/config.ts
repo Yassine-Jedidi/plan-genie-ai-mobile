@@ -42,29 +42,29 @@ export const apiRequest = async (endpoint: string, options: AxiosRequestConfig =
   }
 };
 
-// Generic file upload request function using axios
-export const fileUploadRequest = async (endpoint: string, file: any, options: AxiosRequestConfig = {}) => {
+// Generic file upload request function using fetch (for React Native compatibility)
+export const fileUploadRequest = async (endpoint: string, file: any, options: any = {}) => {
   try {
     const formData = new FormData();
     formData.append('file', file);
 
-    const config: AxiosRequestConfig = {
-      ...options,
+    const response = await fetch(API_BASE_URL + endpoint, {
       method: 'POST',
       headers: {
         'User-Agent': 'Plan-Genie-Mobile-App/1.0 (Expo)',
-        ...options.headers,
+        // Do NOT set Content-Type, let fetch set it automatically!
+        ...(options.headers || {}),
       },
-      data: formData,
-    };
+      body: formData,
+    });
 
-    const response: AxiosResponse = await axiosInstance(endpoint, config);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('File Upload Error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.error || error.message || `HTTP error! status: ${error.response?.status}`);
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('File Upload Error:', data);
+      throw new Error(data?.error || 'File upload failed');
     }
+    return data;
+  } catch (error) {
     console.error('File Upload Error:', error);
     throw error;
   }
