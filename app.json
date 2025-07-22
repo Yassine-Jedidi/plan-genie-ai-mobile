@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": ".",
-    "slug": ".",
+    "name": "Plan Genie AI Mobile",
+    "slug": "plan-genie-ai-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "icon": "./images/favicon/favicon.ico",
+    "scheme": "plan-genie-ai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./images/favicon/favicon.ico",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -24,7 +24,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./images/favicon/favicon.ico",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -34,7 +34,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./images/favicon/favicon.ico"
     },
     "plugins": [
       "expo-router"
